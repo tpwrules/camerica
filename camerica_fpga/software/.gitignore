@@ -1,0 +1,7 @@
+preloader/
+
+obj/
+*.elf
+*.map
+*.objdump
+libhal_bsp.a
