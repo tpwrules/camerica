@@ -16,5 +16,6 @@ stamp/
 u-boot.scr
 .qsys_edit/
 camerica_fpga.qws
+greybox_tmp/
 
 workspace/
