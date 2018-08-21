@@ -248,7 +248,87 @@ vga_pll  vga_pll_inst(
         .locked()    //  locked.export
 );
 
+
+	logic [33:0] GPIO0;
+	
+	assign GPIO0[0] = GPIO[1];
+	assign GPIO0[1] = GPIO[3];
+	assign GPIO0[33:2] = GPIO[35:4];
+	
+
+	wire [11:0] cam_pixel_in, cam_pixel;
+	wire cam_hsync, cam_vsync, cam_clk;
+	
+	assign cam_pixel_in = {
+		// from MSB to LSB
+		GPIO0[21],
+		GPIO0[19],
+		GPIO0[17],
+		GPIO0[15],
+	
+		GPIO0[13],
+		GPIO0[11],
+		GPIO0[9],
+		GPIO0[7],
+		
+		GPIO0[5],
+		GPIO0[3],
+		GPIO0[1],
+		GPIO0[0]
+	};
+	
+	assign cam_pixel = SW[0] ? ~cam_pixel_in : cam_pixel_in;
+	
+	assign cam_hsync = GPIO0[25];
+	assign cam_vsync = GPIO0[23];
+	assign cam_clk = GPIO0[27];
+	
+	// linebuffer access outputs
+	logic [10:0] lb_addr;
+	logic [15:0] lb_data;
+	logic lb_write;
+	logic lb_ack;
+	
+	//linereader status and control registers
+	logic [2:0] lr_status;
+	logic [8:0] lr_control;
+	
+		// linereader is reset from system reset
+	// or by the bit in the control register
+	logic lr_rst;
+	assign lr_rst = lr_control[8];
+	
+	// instantiate the line reader engine
+	linereader linereader(
+		.clk(CLOCK_50),
+		.rst(1'b0),
+		
+		.cam_pixel_in(cam_pixel),
+		.cam_hsync_in(cam_hsync),
+		.cam_vsync_in(cam_vsync),
+		.cam_clk_in(cam_clk),
+		
+		.lb_addr(lb_addr),
+		.lb_data(lb_data),
+		.lb_write(lb_write),
+		.lb_ack(lb_ack),
+		
+		.sr_in_hsync(lr_status[0]),
+		.sr_in_vsync(lr_status[1]),
+		.sr_which_line(lr_status[2])
+	);
+
+
 soc_system u0 (
+		
+		.lb_access_address(lb_addr),
+		.lb_access_byte_enable(2'h3),
+		.lb_access_read(1'b0),
+		.lb_access_write(lb_write),
+		.lb_access_write_data(lb_data),
+		.lb_access_acknowledge(lb_ack),
+		
+		.lr_status_export(lr_status),
         .clk_clk                               (CLOCK_50),              //                            clk.clk
         .reset_reset_n                         (1'b1),                  //                          reset.reset_n
        //HPS ddr3
