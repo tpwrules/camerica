@@ -283,23 +283,41 @@ vga_pll  vga_pll_inst(
 	assign cam_vsync = GPIO0[23];
 	assign cam_clk = GPIO0[27];
 	
-	// linebuffer access outputs
-	logic [10:0] lb_addr;
-	logic [15:0] lb_data;
-	logic lb_write;
-	logic lb_ack;
 	
-	//linereader status and control registers
-	logic [2:0] lr_status;
-	logic [8:0] lr_control;
+	// the Qsys video reader
+	logic vi_clk,
+	logic [11:0] vi_data,
+	logic vi_de,
+	logic vi_locked,
+	logic vi_vsync,
+	logic vi_hsync,
+
+	// NIOS register access
+	logic nr_acknowledge,
+	logic nr_irq,
+	logic [3:0] nr_address,
+	logic nr_bus_enable,
+	logic nr_rw,
+	logic [31:0] nr_write_data,
+	logic [31:0] nr_read_data,
+
+	// HPS register access
+	logic hr_acknowledge,
+	logic hr_irq,
+	logic [3:0] hr_address,
+	logic hr_bus_enable,
+	logic hr_rw,
+	logic [31:0] hr_write_data,
+	logic [31:0] hr_read_data,
+
+	// histo mem access
+	logic hm_acknowledge,
+	logic [10:0] hm_address,
+	logic hm_bus_enable,
+	logic hm_rw,
+	logic [63:0] hm_read_data
 	
-		// linereader is reset from system reset
-	// or by the bit in the control register
-	logic lr_rst;
-	assign lr_rst = lr_control[8];
-	
-	// instantiate the line reader engine
-	linereader linereader(
+	camerica camerica(
 		.clk(CLOCK_50),
 		.rst(1'b0),
 		
@@ -308,27 +326,76 @@ vga_pll  vga_pll_inst(
 		.cam_vsync_in(cam_vsync),
 		.cam_clk_in(cam_clk),
 		
-		.lb_addr(lb_addr),
-		.lb_data(lb_data),
-		.lb_write(lb_write),
-		.lb_ack(lb_ack),
+		.vi_clk(vi_clk),
+		.vi_data(vi_data),
+		.vi_de(vi_de),
+		.vi_locked(vi_locked),
+		.vi_vsync(vi_vsync),
+		.vi_hsync(vi_hsync),
 		
-		.sr_in_hsync(lr_status[0]),
-		.sr_in_vsync(lr_status[1]),
-		.sr_which_line(lr_status[2])
+		.nr_acknowledge(nr_acknowledge),
+		.nr_irq(nr_irq),
+		.nr_address(nr_address[3:2]),
+		.nr_bus_enable(nr_bus_enable),
+		.nr_rw(nr_rw),
+		.nr_write_data(nr_write_data)
+		.nr_read_data(nr_read_data),
+		
+		.hr_acknowledge(hr_acknowledge),
+		.hr_irq(hr_irq),
+		.hr_address(hr_address[3:2]),
+		.hr_bus_enable(hr_bus_enable),
+		.hr_rw(hr_rw),
+		.hr_write_data(hr_write_data),
+		.hr_read_data(hr_read_data),
+		
+		.hm_acknowledge(hm_acknowledge),
+		.hm_address(hm_address[10:3]),
+		.hm_bus_enable(hm_bus_enable),
+		.hm_rw(hm_rw),
+		.hm_read_data(hm_read_data)
 	);
 
 
 soc_system u0 (
+		.vid_in_vid_clk(vi_clk),
+		.vid_in_vid_data(vi_data),
+		.vid_in_vid_de(vi_de),
+		.vid_in_vid_datavalid(1'b1),
+		.vid_in_vid_locked(vi_locked),
+		.vid_in_vid_f(1'bz),
+		.vid_in_vid_v_sync(vi_vsync),
+		.vid_in_vid_h_sync(vi_hsync),
+		.vid_in_vid_color_encoding(8'b0),
+		.vid_in_vid_bit_width(8'b0),
 		
-		.lb_access_address(lb_addr),
-		.lb_access_byte_enable(2'h3),
-		.lb_access_read(1'b0),
-		.lb_access_write(lb_write),
-		.lb_access_write_data(lb_data),
-		.lb_access_acknowledge(lb_ack),
+		.nios_vid_regs_acknowledge(nr_acknowledge),
+		.nios_vid_regs_irq(nr_irq),
+		.nios_vid_regs_address(nr_address),
+		.nios_vid_regs_bus_enable(nr_bus_enable),
+		.nios_vid_regs_rw(nr_rw),
+		.nios_vid_regs_write_data(nr_write_data),
+		.nios_vid_regs_read_data(nr_read_data),
 		
-		.lr_status_export(lr_status),
+		.hps_vid_regs_acknowledge(hr_acknowledge),
+		.hps_vid_regs_irq(hr_irq),
+		.hps_vid_regs_address(hr_address),
+		.hps_vid_regs_bus_enable(hr_bus_enable),
+		.hps_vid_regs_rw(hr_rw),
+		.hps_vid_regs_write_data(hr_write_data),
+		.hps_vid_regs_read_data(hr_read_data),
+		
+		.histo_mem_acknowledge(hm_acknowledge),
+		.histo_mem_irq(1'b0),
+		.histo_mem_address(hm_address),
+		.histo_mem_bus_enable(hm_bus_enable),
+		.histo_mem_rw(hm_rw),
+		.histo_mem_read_data(hm_read_data),
+		
+		
+		
+	
+		
         .clk_clk                               (CLOCK_50),              //                            clk.clk
         .reset_reset_n                         (1'b1),                  //                          reset.reset_n
        //HPS ddr3
