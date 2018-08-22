@@ -18,6 +18,10 @@ set_input_delay -clock altera_reserved_tck -clock_fall 3 [get_ports altera_reser
 set_output_delay -clock altera_reserved_tck 3 [get_ports altera_reserved_tdo]
 
 
+# camera input clock
+# nominally 6.25MHz
+create_clock -name cambus_clk -period "6.25 MHz" [get_ports GPIO[29]]
+
 #**************************************************************
 # Create Generated Clock
 #**************************************************************
