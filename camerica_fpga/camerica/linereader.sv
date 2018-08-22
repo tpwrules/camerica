@@ -17,7 +17,9 @@ module linereader(
 	// status out
 	output logic sr_in_hsync,
 	output logic sr_in_vsync,
-	output logic sr_which_line
+	output logic sr_which_line,
+	
+	output logic cam_pixel_in_is_zero
 );
 		
 
@@ -29,6 +31,8 @@ module linereader(
 	// camera bus data from the fifo
 	logic [11:0] cam_pixel;
 	logic cam_hsync, cam_vsync;
+	
+	assign cam_pixel_in_is_zero = cam_pixel_in[7:0] == 8'd0;
 	
 	cambus_fifo cambus_fifo(
 		.wrclk(cam_clk_in), // camera directly writes to fifo
