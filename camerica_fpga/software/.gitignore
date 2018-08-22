@@ -5,3 +5,4 @@ obj/
 *.map
 *.objdump
 libhal_bsp.a
+.force_relink
