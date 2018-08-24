@@ -285,46 +285,46 @@ vga_pll  vga_pll_inst(
 	
 	
 	// the Qsys video reader
-	logic vi_clk,
-	logic [11:0] vi_data,
-	logic vi_de,
-	logic vi_locked,
-	logic vi_vsync,
-	logic vi_hsync,
+	logic vi_clk;
+	logic [11:0] vi_data;
+	logic vi_de;
+	logic vi_locked;
+	logic vi_vsync;
+	logic vi_hsync;
 
 	// NIOS register access
-	logic nr_acknowledge,
-	logic nr_irq,
-	logic [3:0] nr_address,
-	logic nr_bus_enable,
-	logic nr_rw,
-	logic [31:0] nr_write_data,
-	logic [31:0] nr_read_data,
+	logic nr_acknowledge;
+	logic nr_irq;
+	logic [3:0] nr_address;
+	logic nr_bus_enable;
+	logic nr_rw;
+	logic [31:0] nr_write_data;
+	logic [31:0] nr_read_data;
 
 	// HPS register access
-	logic hr_acknowledge,
-	logic hr_irq,
-	logic [3:0] hr_address,
-	logic hr_bus_enable,
-	logic hr_rw,
-	logic [31:0] hr_write_data,
-	logic [31:0] hr_read_data,
+	logic hr_acknowledge;
+	logic hr_irq;
+	logic [3:0] hr_address;
+	logic hr_bus_enable;
+	logic hr_rw;
+	logic [31:0] hr_write_data;
+	logic [31:0] hr_read_data;
 
 	// histo mem access
-	logic hm_acknowledge,
-	logic [10:0] hm_address,
-	logic hm_bus_enable,
-	logic hm_rw,
-	logic [63:0] hm_read_data
+	logic hm_acknowledge;
+	logic [10:0] hm_address;
+	logic hm_bus_enable;
+	logic hm_rw;
+	logic [63:0] hm_read_data;
 	
 	camerica camerica(
 		.clk(CLOCK_50),
 		.rst(1'b0),
 		
-		.cam_pixel_in(cam_pixel),
-		.cam_hsync_in(cam_hsync),
-		.cam_vsync_in(cam_vsync),
-		.cam_clk_in(cam_clk),
+		.cam_clk(cam_clk),
+		.cam_pixel(cam_pixel),
+		.cam_hsync(cam_hsync),
+		.cam_vsync(cam_vsync),
 		
 		.vi_clk(vi_clk),
 		.vi_data(vi_data),
@@ -338,7 +338,7 @@ vga_pll  vga_pll_inst(
 		.nr_address(nr_address[3:2]),
 		.nr_bus_enable(nr_bus_enable),
 		.nr_rw(nr_rw),
-		.nr_write_data(nr_write_data)
+		.nr_write_data(nr_write_data),
 		.nr_read_data(nr_read_data),
 		
 		.hr_acknowledge(hr_acknowledge),
