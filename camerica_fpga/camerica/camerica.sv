@@ -38,4 +38,26 @@ module camerica (
 	output logic [63:0] vm_read_data
 );
 
+	// retime the camera to the main clock
+	logic [11:0] vid_pixel;
+	logic vid_pixsync, vid_hsync, vid_vsync;
+	logic vid_visible, vid_locked;
+	cambus cambus(
+		.clk(clk),
+		.rst(rst),
+		
+		.cam_clk(cam_clk),
+		.cam_pixel(cam_pixel),
+		.cam_hsync(cam_hsync),
+		.cam_vsync(cam_vsync),
+		
+		.vid_pixel(vid_pixel),
+		.vid_pixsync(vid_pixsync),
+		.vid_hsync(vid_hsync),
+		.vid_vsync(vid_vsync),
+		.vid_visible(vid_visible),
+		.vid_locked(vid_locked)
+	);
+	
+
 endmodule
