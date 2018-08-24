@@ -12,14 +12,6 @@ module camerica (
 
 	// Qsys interconnects
 	
-	// the Qsys video reader
-	output logic vi_clk,
-	output logic [11:0] vi_data,
-	output logic vi_de,
-	output logic vi_locked,
-	output logic vi_vsync,
-	output logic vi_hsync,
-	
 	// NIOS register access
 	output logic nr_acknowledge,
 	output logic nr_irq,
@@ -38,13 +30,12 @@ module camerica (
 	input logic [31:0] hr_write_data,
 	output logic [31:0] hr_read_data,
 	
-	// histo mem access
-	output logic hm_acknowledge,
-	input logic [7:0] hm_address,
-	input logic hm_bus_enable,
-	input logic hm_rw,
-	output logic [63:0] hm_read_data
-
+	// vid mem access
+	output logic vm_acknowledge,
+	input logic [7:0] vm_address,
+	input logic vm_bus_enable,
+	input logic vm_rw,
+	output logic [63:0] vm_read_data
 );
 
 endmodule

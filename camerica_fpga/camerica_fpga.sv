@@ -284,14 +284,6 @@ vga_pll  vga_pll_inst(
 	assign cam_clk = GPIO0[27];
 	
 	
-	// the Qsys video reader
-	logic vi_clk;
-	logic [11:0] vi_data;
-	logic vi_de;
-	logic vi_locked;
-	logic vi_vsync;
-	logic vi_hsync;
-
 	// NIOS register access
 	logic nr_acknowledge;
 	logic nr_irq;
@@ -310,12 +302,12 @@ vga_pll  vga_pll_inst(
 	logic [31:0] hr_write_data;
 	logic [31:0] hr_read_data;
 
-	// histo mem access
-	logic hm_acknowledge;
-	logic [10:0] hm_address;
-	logic hm_bus_enable;
-	logic hm_rw;
-	logic [63:0] hm_read_data;
+	// vid mem access
+	logic vm_acknowledge;
+	logic [11:0] vm_address;
+	logic vm_bus_enable;
+	logic vm_rw;
+	logic [63:0] vm_read_data;
 	
 	camerica camerica(
 		.clk(CLOCK_50),
@@ -325,13 +317,6 @@ vga_pll  vga_pll_inst(
 		.cam_pixel(cam_pixel),
 		.cam_hsync(cam_hsync),
 		.cam_vsync(cam_vsync),
-		
-		.vi_clk(vi_clk),
-		.vi_data(vi_data),
-		.vi_de(vi_de),
-		.vi_locked(vi_locked),
-		.vi_vsync(vi_vsync),
-		.vi_hsync(vi_hsync),
 		
 		.nr_acknowledge(nr_acknowledge),
 		.nr_irq(nr_irq),
@@ -349,26 +334,15 @@ vga_pll  vga_pll_inst(
 		.hr_write_data(hr_write_data),
 		.hr_read_data(hr_read_data),
 		
-		.hm_acknowledge(hm_acknowledge),
-		.hm_address(hm_address[10:3]),
-		.hm_bus_enable(hm_bus_enable),
-		.hm_rw(hm_rw),
-		.hm_read_data(hm_read_data)
+		.vm_acknowledge(vm_acknowledge),
+		.vm_address(vm_address[11:3]),
+		.vm_bus_enable(vm_bus_enable),
+		.vm_rw(vm_rw),
+		.vm_read_data(vm_read_data)
 	);
 
 
 soc_system u0 (
-		.vid_in_vid_clk(vi_clk),
-		.vid_in_vid_data(vi_data),
-		.vid_in_vid_de(vi_de),
-		.vid_in_vid_datavalid(1'b1),
-		.vid_in_vid_locked(vi_locked),
-		.vid_in_vid_f(1'bz),
-		.vid_in_vid_v_sync(vi_vsync),
-		.vid_in_vid_h_sync(vi_hsync),
-		.vid_in_vid_color_encoding(8'b0),
-		.vid_in_vid_bit_width(8'b0),
-		
 		.nios_vid_regs_acknowledge(nr_acknowledge),
 		.nios_vid_regs_irq(nr_irq),
 		.nios_vid_regs_address(nr_address),
@@ -385,16 +359,13 @@ soc_system u0 (
 		.hps_vid_regs_write_data(hr_write_data),
 		.hps_vid_regs_read_data(hr_read_data),
 		
-		.histo_mem_acknowledge(hm_acknowledge),
-		.histo_mem_irq(1'b0),
-		.histo_mem_address(hm_address),
-		.histo_mem_bus_enable(hm_bus_enable),
-		.histo_mem_rw(hm_rw),
-		.histo_mem_read_data(hm_read_data),
-		
-		
-		
-	
+		.vid_mem_acknowledge(vm_acknowledge),
+		.vid_mem_irq(1'b0),
+		.vid_mem_address(vm_address),
+		.vid_mem_bus_enable(vm_bus_enable),
+		.vid_mem_rw(vm_rw),
+		.vid_mem_read_data(vm_read_data),
+
 		
         .clk_clk                               (CLOCK_50),              //                            clk.clk
         .reset_reset_n                         (1'b1),                  //                          reset.reset_n
