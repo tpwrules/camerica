@@ -40,7 +40,7 @@ module camerica (
 
 	// retime the camera to the main clock
 	logic [11:0] vid_pixel;
-	logic vid_pixsync, vid_hsync, vid_vsync;
+	logic vid_pixsync, vid_hblank, vid_vblank;
 	logic vid_visible, vid_locked;
 	cambus cambus(
 		.clk(clk),
@@ -53,8 +53,8 @@ module camerica (
 		
 		.vid_pixel(vid_pixel),
 		.vid_pixsync(vid_pixsync),
-		.vid_hsync(vid_hsync),
-		.vid_vsync(vid_vsync),
+		.vid_hblank(vid_hblank),
+		.vid_vblank(vid_vblank),
 		.vid_visible(vid_visible),
 		.vid_locked(vid_locked)
 	);
