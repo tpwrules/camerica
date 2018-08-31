@@ -32,7 +32,7 @@ module camerica (
 	
 	// vid mem access
 	output logic vm_acknowledge,
-	input logic [7:0] vm_address,
+	input logic [8:0] vm_address,
 	input logic vm_bus_enable,
 	input logic vm_rw,
 	output logic [63:0] vm_read_data
@@ -57,6 +57,30 @@ module camerica (
 		.vid_vblank(vid_vblank),
 		.vid_visible(vid_visible),
 		.vid_locked(vid_locked)
+	);
+	
+	logic status_which_line;
+	logic status_which_histo;
+	
+	// the linereader module actually reads the lines into memory
+	linereader linereader(
+		.clk(clk),
+		.rst(rst || !vid_locked),
+		
+		.vid_pixel(vid_pixel),
+		.vid_pixsync(vid_pixsync),
+		.vid_hblank(vid_hblank),
+		.vid_vblank(vid_vblank),
+		.vid_visible(vid_visible),
+
+		.vm_acknowledge(vm_acknowledge),
+		.vm_address(vm_address),
+		.vm_bus_enable(vm_bus_enable),
+		.vm_rw(vm_rw),
+		.vm_read_data(vm_read_data),
+		
+		.status_which_line(status_which_line),
+		.status_which_histo(status_which_histo)
 	);
 	
 
