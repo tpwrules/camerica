@@ -83,7 +83,7 @@ module cambus (
 	end
 	
 	logic h_visible, v_visible;
-	assign h_visible = (pixels >= 9'd2 && pixels < 9'd322);
+	assign h_visible = (pixels >= 9'd1 && pixels < 9'd321);
 	assign v_visible = (lines >= 9'd1 && lines < 9'd259);
 	assign vid_hblank = !h_visible;
 	assign vid_vblank = !v_visible;
