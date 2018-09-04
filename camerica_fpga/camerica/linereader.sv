@@ -83,4 +83,66 @@ module linereader(
 		end
 	end
 	
+	typedef enum logic [1:0] {VF_VBLANK, VF_HBLANK, VF_VISIBLE} vid_fsm_t;
+	vid_fsm_t vcstate, vnstate;
+	
+	logic [8:0] xpos;
+	
+	logic flip_which_line;
+	
+	always @(posedge clk) begin
+		if (rst) begin
+			vcstate <= VF_VBLANK;
+			xpos <= 9'd0;
+		end else begin
+			vcstate <= vnstate;
+		end
+		
+		if (vcstate == VF_VISIBLE) begin
+			xpos <= xpos + 1'd1;
+		end else begin
+			xpos <= 9'd0;
+		end
+		
+		if (flip_which_line) begin
+			status_which_line <= !status_which_line;
+		end
+	end
+	
+	// set up video writer input
+	assign lr_data_in = vid_pixel;
+	assign lr_addr = {status_which_line, xpos};
+	
+	always @(*) begin
+		vnstate = vcstate;
+		flip_which_line = 1'b0;
+		lr_wren = 1'b0;
+		case (vcstate)
+			VF_VISIBLE: begin
+				lr_wren = 1'b1;
+				if (vid_vblank) begin
+					vnstate = VF_VBLANK;
+					flip_which_line = 1'b1;
+				end else if (vid_hblank) begin
+					vnstate = VF_HBLANK;
+					flip_which_line = 1'b1;
+				end
+			end
+			
+			VF_HBLANK: begin
+				if (vid_vblank) begin
+					vnstate = VF_VBLANK;
+				end else if (!vid_hblank) begin
+					vnstate = VF_VISIBLE;
+				end
+			end
+			
+			VF_VBLANK: begin
+				if (!vid_vblank) begin
+					vnstate = vid_hblank ? VF_HBLANK : VF_VISIBLE;
+				end
+			end
+		endcase
+	end
+	
 endmodule
