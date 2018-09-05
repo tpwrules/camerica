@@ -121,7 +121,7 @@ AR_REGEX += \
 	altera_avalon* *.qpf *.qsf *.sdc *.v *.sv *.vhd *.qsys *.tcl *.terp *.stp \
 	*.sed quartus.ini *.sof *.rbf *.sopcinfo *.jdi output_files \
 	hps_isw_handoff */*.svd */synthesis/*.svd */synth/*.svd *.dts *.dtb *.xml \
-	$(SOFTWARE_DIR)
+	$(SOFTWARE_DIR) workspace camerica *.vcd
 
 AR_FILTER_OUT += %_tb.qsys
 ################################################
