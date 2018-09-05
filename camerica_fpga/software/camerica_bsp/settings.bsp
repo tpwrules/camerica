@@ -2,8 +2,8 @@
 <sch:Settings xmlns:sch="http://www.altera.com/embeddedsw/bsp/schema">
         <BspType>hal</BspType>
         <BspVersion>default</BspVersion>
-        <BspGeneratedTimeStamp>Aug 21, 2018 10:55:47 AM</BspGeneratedTimeStamp>
-        <BspGeneratedUnixTimeStamp>1534866947412</BspGeneratedUnixTimeStamp>
+        <BspGeneratedTimeStamp>Sep 5, 2018 3:57:12 PM</BspGeneratedTimeStamp>
+        <BspGeneratedUnixTimeStamp>1536181032114</BspGeneratedUnixTimeStamp>
         <BspGeneratedLocation>C:\Users\thomas\Documents\merlin\de10std\camerica_fpga\software\camerica_bsp</BspGeneratedLocation>
         <BspSettingsFile>C:\Users\thomas\Documents\merlin\de10std\camerica_fpga\software\camerica_bsp\settings.bsp</BspSettingsFile>
         <SopcDesignFile>..\..\soc_system.sopcinfo</SopcDesignFile>
@@ -26,7 +26,7 @@
                 <SettingName>hal.timestamp_timer</SettingName>
                 <Identifier>ALT_TIMESTAMP_CLK</Identifier>
                 <Type>UnquotedString</Type>
-                <Value>nios_perftimer</Value>
+                <Value>none</Value>
                 <DefaultValue>none</DefaultValue>
                 <DestinationFile>system_h_define</DestinationFile>
                 <Description>Slave descriptor of timestamp timer device. This device is used by Altera HAL timestamp drivers for high-resolution time measurement. This setting defines the value of ALT_TIMESTAMP_CLK in system.h.</Description>
@@ -905,9 +905,9 @@
                 <attributes>memory</attributes>
         </MemoryMap>
         <MemoryMap>
-                <slaveDescriptor>lr_status</slaveDescriptor>
-                <addressRange>0x00020000 - 0x0002000F</addressRange>
-                <addressSpan>16</addressSpan>
+                <slaveDescriptor>vid_dma</slaveDescriptor>
+                <addressRange>0x00020000 - 0x0002001F</addressRange>
+                <addressSpan>32</addressSpan>
                 <attributes/>
         </MemoryMap>
         <MemoryMap>
@@ -917,9 +917,9 @@
                 <attributes/>
         </MemoryMap>
         <MemoryMap>
-                <slaveDescriptor>lb_dma</slaveDescriptor>
-                <addressRange>0x00022000 - 0x0002201F</addressRange>
-                <addressSpan>32</addressSpan>
+                <slaveDescriptor>nios_vid_regs</slaveDescriptor>
+                <addressRange>0x00022000 - 0x0002200F</addressRange>
+                <addressSpan>16</addressSpan>
                 <attributes/>
         </MemoryMap>
         <MemoryMap>
@@ -927,12 +927,6 @@
                 <addressRange>0x00023000 - 0x00023007</addressRange>
                 <addressSpan>8</addressSpan>
                 <attributes>printable</attributes>
-        </MemoryMap>
-        <MemoryMap>
-                <slaveDescriptor>nios_perftimer</slaveDescriptor>
-                <addressRange>0x00024000 - 0x0002401F</addressRange>
-                <addressSpan>32</addressSpan>
-                <attributes>timer</attributes>
         </MemoryMap>
         <LinkerSection>
                 <sectionName>.text</sectionName>

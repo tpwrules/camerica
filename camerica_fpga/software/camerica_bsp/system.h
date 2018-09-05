@@ -4,7 +4,7 @@
  * Machine generated for CPU 'nios2_gen2_0' in SOPC Builder design 'soc_system'
  * SOPC Builder design path: ../../soc_system.sopcinfo
  *
- * Generated: Tue Aug 21 10:55:47 CDT 2018
+ * Generated: Wed Sep 05 15:57:13 CDT 2018
  */
 
 /*
@@ -136,10 +136,9 @@
 #define __ALTERA_AVALON_DMA
 #define __ALTERA_AVALON_JTAG_UART
 #define __ALTERA_AVALON_ONCHIP_MEMORY2
-#define __ALTERA_AVALON_PIO
 #define __ALTERA_AVALON_SYSID_QSYS
-#define __ALTERA_AVALON_TIMER
 #define __ALTERA_NIOS2_GEN2
+#define __ALTERA_UP_AVALON_TO_EXTERNAL_BUS_BRIDGE
 
 
 /*
@@ -185,96 +184,20 @@
 
 #define ALT_MAX_FD 4
 #define ALT_SYS_CLK none
-#define ALT_TIMESTAMP_CLK NIOS_PERFTIMER
+#define ALT_TIMESTAMP_CLK none
 
 
 /*
- * hps_0_bridges configuration as viewed by lb_dma_write_master
+ * hps_0_bridges configuration as viewed by vid_dma_write_master
  *
  */
 
-#define LB_DMA_WRITE_MASTER_HPS_0_BRIDGES_BASE 0x0
-#define LB_DMA_WRITE_MASTER_HPS_0_BRIDGES_IRQ -1
-#define LB_DMA_WRITE_MASTER_HPS_0_BRIDGES_IRQ_INTERRUPT_CONTROLLER_ID -1
-#define LB_DMA_WRITE_MASTER_HPS_0_BRIDGES_NAME "/dev/hps_0_bridges"
-#define LB_DMA_WRITE_MASTER_HPS_0_BRIDGES_SPAN 4294967296
-#define LB_DMA_WRITE_MASTER_HPS_0_BRIDGES_TYPE "hps_bridge_avalon"
-
-
-/*
- * lb_dma configuration
- *
- */
-
-#define ALT_MODULE_CLASS_lb_dma altera_avalon_dma
-#define LB_DMA_ALLOW_BYTE_TRANSACTIONS 0
-#define LB_DMA_ALLOW_DOUBLEWORD_TRANSACTIONS 0
-#define LB_DMA_ALLOW_HW_TRANSACTIONS 0
-#define LB_DMA_ALLOW_QUADWORD_TRANSACTIONS 0
-#define LB_DMA_ALLOW_WORD_TRANSACTIONS 1
-#define LB_DMA_BASE 0x22000
-#define LB_DMA_IRQ 0
-#define LB_DMA_IRQ_INTERRUPT_CONTROLLER_ID 0
-#define LB_DMA_LENGTHWIDTH 9
-#define LB_DMA_MAX_BURST_SIZE 64
-#define LB_DMA_NAME "/dev/lb_dma"
-#define LB_DMA_SPAN 32
-#define LB_DMA_TYPE "altera_avalon_dma"
-
-
-/*
- * linebuf configuration as viewed by lb_dma_read_master
- *
- */
-
-#define LB_DMA_READ_MASTER_LINEBUF_ALLOW_IN_SYSTEM_MEMORY_CONTENT_EDITOR 0
-#define LB_DMA_READ_MASTER_LINEBUF_ALLOW_MRAM_SIM_CONTENTS_ONLY_FILE 0
-#define LB_DMA_READ_MASTER_LINEBUF_BASE 0x0
-#define LB_DMA_READ_MASTER_LINEBUF_CONTENTS_INFO ""
-#define LB_DMA_READ_MASTER_LINEBUF_DUAL_PORT 1
-#define LB_DMA_READ_MASTER_LINEBUF_GUI_RAM_BLOCK_TYPE "M10K"
-#define LB_DMA_READ_MASTER_LINEBUF_INIT_CONTENTS_FILE "soc_system_linebuf"
-#define LB_DMA_READ_MASTER_LINEBUF_INIT_MEM_CONTENT 0
-#define LB_DMA_READ_MASTER_LINEBUF_INSTANCE_ID "NONE"
-#define LB_DMA_READ_MASTER_LINEBUF_IRQ -1
-#define LB_DMA_READ_MASTER_LINEBUF_IRQ_INTERRUPT_CONTROLLER_ID -1
-#define LB_DMA_READ_MASTER_LINEBUF_NAME "/dev/linebuf"
-#define LB_DMA_READ_MASTER_LINEBUF_NON_DEFAULT_INIT_FILE_ENABLED 0
-#define LB_DMA_READ_MASTER_LINEBUF_RAM_BLOCK_TYPE "M10K"
-#define LB_DMA_READ_MASTER_LINEBUF_READ_DURING_WRITE_MODE "DONT_CARE"
-#define LB_DMA_READ_MASTER_LINEBUF_SINGLE_CLOCK_OP 1
-#define LB_DMA_READ_MASTER_LINEBUF_SIZE_MULTIPLE 1
-#define LB_DMA_READ_MASTER_LINEBUF_SIZE_VALUE 1024
-#define LB_DMA_READ_MASTER_LINEBUF_SPAN 1024
-#define LB_DMA_READ_MASTER_LINEBUF_TYPE "altera_avalon_onchip_memory2"
-#define LB_DMA_READ_MASTER_LINEBUF_WRITABLE 1
-
-
-/*
- * lr_status configuration
- *
- */
-
-#define ALT_MODULE_CLASS_lr_status altera_avalon_pio
-#define LR_STATUS_BASE 0x20000
-#define LR_STATUS_BIT_CLEARING_EDGE_REGISTER 0
-#define LR_STATUS_BIT_MODIFYING_OUTPUT_REGISTER 0
-#define LR_STATUS_CAPTURE 0
-#define LR_STATUS_DATA_WIDTH 3
-#define LR_STATUS_DO_TEST_BENCH_WIRING 0
-#define LR_STATUS_DRIVEN_SIM_VALUE 0
-#define LR_STATUS_EDGE_TYPE "NONE"
-#define LR_STATUS_FREQ 50000000
-#define LR_STATUS_HAS_IN 1
-#define LR_STATUS_HAS_OUT 0
-#define LR_STATUS_HAS_TRI 0
-#define LR_STATUS_IRQ -1
-#define LR_STATUS_IRQ_INTERRUPT_CONTROLLER_ID -1
-#define LR_STATUS_IRQ_TYPE "NONE"
-#define LR_STATUS_NAME "/dev/lr_status"
-#define LR_STATUS_RESET_VALUE 0
-#define LR_STATUS_SPAN 16
-#define LR_STATUS_TYPE "altera_avalon_pio"
+#define VID_DMA_WRITE_MASTER_HPS_0_BRIDGES_BASE 0x0
+#define VID_DMA_WRITE_MASTER_HPS_0_BRIDGES_IRQ -1
+#define VID_DMA_WRITE_MASTER_HPS_0_BRIDGES_IRQ_INTERRUPT_CONTROLLER_ID -1
+#define VID_DMA_WRITE_MASTER_HPS_0_BRIDGES_NAME "/dev/hps_0_bridges"
+#define VID_DMA_WRITE_MASTER_HPS_0_BRIDGES_SPAN 4294967296
+#define VID_DMA_WRITE_MASTER_HPS_0_BRIDGES_TYPE "hps_bridge_avalon"
 
 
 /*
@@ -293,32 +216,6 @@
 #define NIOS_COMMS_TYPE "altera_avalon_jtag_uart"
 #define NIOS_COMMS_WRITE_DEPTH 64
 #define NIOS_COMMS_WRITE_THRESHOLD 8
-
-
-/*
- * nios_perftimer configuration
- *
- */
-
-#define ALT_MODULE_CLASS_nios_perftimer altera_avalon_timer
-#define NIOS_PERFTIMER_ALWAYS_RUN 1
-#define NIOS_PERFTIMER_BASE 0x24000
-#define NIOS_PERFTIMER_COUNTER_SIZE 32
-#define NIOS_PERFTIMER_FIXED_PERIOD 1
-#define NIOS_PERFTIMER_FREQ 50000000
-#define NIOS_PERFTIMER_IRQ 2
-#define NIOS_PERFTIMER_IRQ_INTERRUPT_CONTROLLER_ID 0
-#define NIOS_PERFTIMER_LOAD_VALUE -2
-#define NIOS_PERFTIMER_MULT 2.0E-8
-#define NIOS_PERFTIMER_NAME "/dev/nios_perftimer"
-#define NIOS_PERFTIMER_PERIOD -1
-#define NIOS_PERFTIMER_PERIOD_UNITS "clocks"
-#define NIOS_PERFTIMER_RESET_OUTPUT 0
-#define NIOS_PERFTIMER_SNAPSHOT 1
-#define NIOS_PERFTIMER_SPAN 32
-#define NIOS_PERFTIMER_TICKS_PER_SEC 0
-#define NIOS_PERFTIMER_TIMEOUT_PULSE_OUTPUT 0
-#define NIOS_PERFTIMER_TYPE "altera_avalon_timer"
 
 
 /*
@@ -351,6 +248,20 @@
 
 
 /*
+ * nios_vid_regs configuration
+ *
+ */
+
+#define ALT_MODULE_CLASS_nios_vid_regs altera_up_avalon_to_external_bus_bridge
+#define NIOS_VID_REGS_BASE 0x22000
+#define NIOS_VID_REGS_IRQ 0
+#define NIOS_VID_REGS_IRQ_INTERRUPT_CONTROLLER_ID 0
+#define NIOS_VID_REGS_NAME "/dev/nios_vid_regs"
+#define NIOS_VID_REGS_SPAN 16
+#define NIOS_VID_REGS_TYPE "altera_up_avalon_to_external_bus_bridge"
+
+
+/*
  * sysid_qsys configuration
  *
  */
@@ -362,7 +273,41 @@
 #define SYSID_QSYS_IRQ_INTERRUPT_CONTROLLER_ID -1
 #define SYSID_QSYS_NAME "/dev/sysid_qsys"
 #define SYSID_QSYS_SPAN 8
-#define SYSID_QSYS_TIMESTAMP 1534866647
+#define SYSID_QSYS_TIMESTAMP 1536109592
 #define SYSID_QSYS_TYPE "altera_avalon_sysid_qsys"
+
+
+/*
+ * vid_dma configuration
+ *
+ */
+
+#define ALT_MODULE_CLASS_vid_dma altera_avalon_dma
+#define VID_DMA_ALLOW_BYTE_TRANSACTIONS 0
+#define VID_DMA_ALLOW_DOUBLEWORD_TRANSACTIONS 1
+#define VID_DMA_ALLOW_HW_TRANSACTIONS 0
+#define VID_DMA_ALLOW_QUADWORD_TRANSACTIONS 0
+#define VID_DMA_ALLOW_WORD_TRANSACTIONS 0
+#define VID_DMA_BASE 0x20000
+#define VID_DMA_IRQ 2
+#define VID_DMA_IRQ_INTERRUPT_CONTROLLER_ID 0
+#define VID_DMA_LENGTHWIDTH 11
+#define VID_DMA_MAX_BURST_SIZE 128
+#define VID_DMA_NAME "/dev/vid_dma"
+#define VID_DMA_SPAN 32
+#define VID_DMA_TYPE "altera_avalon_dma"
+
+
+/*
+ * vid_mem_bridge configuration as viewed by vid_dma_read_master
+ *
+ */
+
+#define VID_DMA_READ_MASTER_VID_MEM_BRIDGE_BASE 0x0
+#define VID_DMA_READ_MASTER_VID_MEM_BRIDGE_IRQ -1
+#define VID_DMA_READ_MASTER_VID_MEM_BRIDGE_IRQ_INTERRUPT_CONTROLLER_ID -1
+#define VID_DMA_READ_MASTER_VID_MEM_BRIDGE_NAME "/dev/vid_mem_bridge"
+#define VID_DMA_READ_MASTER_VID_MEM_BRIDGE_SPAN 4096
+#define VID_DMA_READ_MASTER_VID_MEM_BRIDGE_TYPE "altera_up_avalon_to_external_bus_bridge"
 
 #endif /* __SYSTEM_H_ */
