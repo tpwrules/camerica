@@ -99,7 +99,8 @@ module linereader(
 		end
 		
 		if (vcstate == VF_VISIBLE) begin
-			xpos <= xpos + 1'd1;
+			if (vid_pixsync)
+				xpos <= xpos + 1'd1;
 		end else begin
 			xpos <= 9'd0;
 		end
@@ -117,29 +118,121 @@ module linereader(
 		vnstate = vcstate;
 		flip_which_line = 1'b0;
 		lr_wren = 1'b0;
-		case (vcstate)
-			VF_VISIBLE: begin
-				lr_wren = 1'b1;
-				if (vid_vblank) begin
-					vnstate = VF_VBLANK;
-					flip_which_line = 1'b1;
-				end else if (vid_hblank) begin
-					vnstate = VF_HBLANK;
-					flip_which_line = 1'b1;
+		if (vid_pixsync) begin
+			case (vcstate)
+				VF_VISIBLE: begin
+					lr_wren = 1'b1;
+					if (vid_vblank) begin
+						vnstate = VF_VBLANK;
+						flip_which_line = 1'b1;
+					end else if (vid_hblank) begin
+						vnstate = VF_HBLANK;
+						flip_which_line = 1'b1;
+					end
+				end
+				
+				VF_HBLANK: begin
+					if (vid_vblank) begin
+						vnstate = VF_VBLANK;
+					end else if (!vid_hblank) begin
+						vnstate = VF_VISIBLE;
+					end
+				end
+				
+				VF_VBLANK: begin
+					if (vid_visible) begin
+						vnstate = VF_VISIBLE;
+					end
+				end
+			endcase
+		end
+	end
+	
+	
+	typedef enum logic [2:0] {HF_VBLANK, HF_HBLANK,
+		HF_READ, HF_WRITE, HF_CLEAR_HRAM} histo_fsm_t;
+	histo_fsm_t hcstate, hnstate;
+	
+	logic flip_which_histo;
+	logic [7:0] hram_clear_addr;
+	logic [7:0] histo_curr_pix;
+	
+	always @(posedge clk) begin
+		if (rst) begin
+			hcstate <= HF_CLEAR_HRAM;
+		end else begin
+			hcstate <= hnstate;
+		end
+		
+		if (hcstate == HF_CLEAR_HRAM) begin
+			hram_clear_addr <= hram_clear_addr + 1'd1;
+		end else begin
+			hram_clear_addr <= 8'd0;
+		end
+		
+		if (flip_which_histo) begin
+			status_which_histo <= !status_which_histo;
+		end
+		
+		if (vid_pixsync) begin
+			histo_curr_pix <= vid_pixel[11:4];
+		end
+	end
+	
+	
+	assign hr_data_in = (hcstate == HF_CLEAR_HRAM) ? 27'd0 :
+		(hr_data_out + 1'd1);
+	assign hr_addr[8] = status_which_histo;
+	
+	always @(*) begin
+		hnstate = hcstate;
+		flip_which_histo = 1'b0;
+		hr_wren = 1'b0;
+		hr_addr[7:0] = 8'b0;
+		
+		case (hcstate)
+			HF_READ: begin
+				if (vid_pixsync) begin
+					if (vid_hblank) begin
+						hnstate = HF_HBLANK;
+					end else if (vid_vblank) begin
+						hnstate = HF_CLEAR_HRAM;
+						flip_which_histo = 1'b1;
+					end else begin
+						hr_addr[7:0] = vid_pixel[11:4];
+						hnstate = HF_WRITE;
+					end
 				end
 			end
 			
-			VF_HBLANK: begin
-				if (vid_vblank) begin
-					vnstate = VF_VBLANK;
-				end else if (!vid_hblank) begin
-					vnstate = VF_VISIBLE;
+			HF_WRITE: begin
+				hr_addr[7:0] = histo_curr_pix;
+				hr_wren = 1'b1;
+				hnstate = HF_READ;
+			end
+			
+			HF_HBLANK: begin
+				if (vid_pixsync) begin
+					if (vid_vblank) begin
+						hnstate = HF_CLEAR_HRAM;
+						flip_which_histo = 1'b1;
+					end else if (!vid_hblank) begin
+						hnstate = HF_READ;
+					end
 				end
 			end
 			
-			VF_VBLANK: begin
-				if (!vid_vblank) begin
-					vnstate = vid_hblank ? VF_HBLANK : VF_VISIBLE;
+			HF_VBLANK: begin
+				if (vid_pixsync && vid_visible) begin
+					hnstate = HF_READ;
+				end
+			end
+			
+			HF_CLEAR_HRAM: begin
+				hr_addr[7:0] = hram_clear_addr;
+				hr_wren = 1'b1;
+				if (hram_clear_addr == 8'hff) begin
+					hnstate = HF_VBLANK;
 				end
 			end
 		endcase
