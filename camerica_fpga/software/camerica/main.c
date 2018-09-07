@@ -163,7 +163,7 @@ int main() {
 			// and set the bit to tell the HPS
 			IOWR_HW_REGS_CONTROL(
 				IORD_HW_REGS_CONTROL() & HW_REGS_CONTROL_SET_FRAME_READY);
-			alt_printf("got it!\n");
+			//alt_printf("got it!\n");
 		}
 		// tell HPS that DMA is actually disabled
 		IOWR_HW_REGS_CONTROL(IORD_HW_REGS_CONTROL() & ~HW_REGS_CONTROL_DMA_ACTIVE);

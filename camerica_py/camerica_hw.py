@@ -4,6 +4,7 @@
 import struct
 import os
 import mmap
+import numpy as np
 
 # where the camerica regs are in HPS memory space
 # they're attached to the lightweight FPGA bus
@@ -118,3 +119,109 @@ class Registers:
 			self.control |= 16
 		else:
 			self.control &= ~16
+			
+			
+class UDMABuf:
+	def __init__(self, name):
+		self.name = name
+		self.path = "/sys/class/udmabuf/{}/".format(name)
+		self.mmap_path = "/dev/{}".format(name)
+		
+		# test to see if the device exists
+		if not os.path.isdir(self.path):
+			raise Exception("UDMA buffer {} does not exist".format(name))
+			
+		# and then to see if it's the correct size
+		size = int(self._cat("size"))
+		if size < 4*1024*1024:
+			raise Exception(
+				"UDMA buffer {} must be {} bytes (it's currently {})".format(
+				4*1024*1024, size))
+		
+		# now save the physical addr
+		self.phys_addr = int(self._cat("phys_addr"), 16)
+		
+		# enable CPU cache
+		self._echo("sync_mode", str(0))
+		
+		# set the entire dma region to be synchronized
+		self._echo("sync_offset", str(0))
+		self._echo("sync_size", str(4*1024*1024))
+		# the device is the one writing to the buffer
+		self._echo("sync_direction", str(2))
+		
+	def _cat(self, fn):
+		path = os.path.join(self.path, fn)
+		return open(path, "r").read()
+		
+	def _echo(self, fn, val):
+		path = os.path.join(self.path, fn)
+		f = open(path, "w")
+		f.write(val)
+		
+	def flush_cache(self):
+		# claim ownership of the buffer to force the
+		# CPU cache to be cleared
+		self._echo("sync_for_cpu", str(1))
+			
+			
+class Framequeue:
+	def __init__(self, udmabuf, regs):
+		self.regs = regs
+		self.udmabuf = udmabuf
+		
+		# construct 16 frame and histo buffers
+		self.frames = []
+		self.histos = []
+		for bi in range(16):
+			self.frames.append(np.memmap(udmabuf.mmap_path,
+				dtype=np.uint16, mode='r',
+				offset=256*1024*bi, shape=(258, 320)))
+			self.histos.append(np.memmap(udmabuf.mmap_path,
+				dtype=np.uint32, mode='r',
+				offset=(256*1024*bi)+(320*258*2), shape=(256,)))
+				
+	def start(self):
+		# make sure we're stopped
+		#self.stop()
+		# write the latest physical addr to the hardware
+		self.regs.dma_phys_addr = self.udmabuf.phys_addr
+		# save the current frame number so we can tell
+		# if new frames have arrived
+		self.last_frame_counter = self.regs.frame_counter
+		# and kick off the DMA
+		self.regs.dma_enabled = True
+		
+	def stop(self):
+		# turn off DMA enable bit
+		self.regs.dma_enabled = False
+		# and wait until the engine finishes for real
+		while self.regs.dma_active: pass
+		
+	def get_new_frames(self):
+		# check if there are, in fact, any new frames
+		frame_counter = self.regs.frame_counter
+		new_frames = (frame_counter - self.last_frame_counter) & 0xFFFFFFFF
+		self.last_frame_counter = frame_counter
+	
+		if new_frames == 0:
+			return tuple(), 0
+			
+		dropped_frames = 0
+		if new_frames > 15: # we missed some frames
+			dropped_frames = new_frames - 15
+			new_frames = 15
+			
+		# calculate buffer to start on
+		which_buf = (frame_counter - new_frames) % 16
+		
+		result = []
+		
+		while new_frames:
+			frame = self.frames[which_buf].copy()
+			histo = self.histos[which_buf].copy()
+			result.append((frame, histo))
+			which_buf = (which_buf + 1) % 16
+			new_frames -= 1
+		
+		return result, dropped_frames
