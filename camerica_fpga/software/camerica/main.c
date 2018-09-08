@@ -130,7 +130,7 @@ int main() {
 			// tell the HPS that the DMA is enabled
 			IOWR_HW_REGS_CONTROL(
 				IORD_HW_REGS_CONTROL() | HW_REGS_CONTROL_DMA_ACTIVE);
-			// wait until the camera deasserts vblank and the frame is visible
+			// wait until the camera deasserts VBLANK and the frame is visible
 			frame_counter++;
 			while ((IORD_HW_REGS_STATUS() & HW_REGS_STATUS_VBLANK));
 			// dma to the start of a new frame in physical memory
@@ -145,7 +145,7 @@ int main() {
 				IOWR_ALTERA_AVALON_DMA_WADDRESS(VID_DMA_BASE,
 					curr_line_addr_dest);
 				
-				// now wait for HSYNC to be asserted, so that the line is finished
+				// now wait for HBLANK to be asserted, so that the line is finished
 				while (!(IORD_HW_REGS_STATUS() & HW_REGS_STATUS_HBLANK));
 				// and write the length so the DMA controller starts working
 				IOWR_ALTERA_AVALON_DMA_LENGTH(VID_DMA_BASE,
@@ -156,6 +156,8 @@ int main() {
 					ALTERA_AVALON_DMA_STATUS_DONE_MSK));
 				// and clear the DONE status
 				IOWR_ALTERA_AVALON_DMA_STATUS(VID_DMA_BASE, 0);
+				// now wait for HBLANK to complete
+				while ((IORD_HW_REGS_STATUS() & HW_REGS_STATUS_HBLANK));
 			}
 			// copy the histogram over too, in the future
 			// write the updated frame count
@@ -163,6 +165,8 @@ int main() {
 			// and set the bit to tell the HPS
 			IOWR_HW_REGS_CONTROL(
 				IORD_HW_REGS_CONTROL() & HW_REGS_CONTROL_SET_FRAME_READY);
+			// wait for VBLANK to begin, we don't do anything then
+			while (!(IORD_HW_REGS_STATUS() & HW_REGS_STATUS_VBLANK));
 			//alt_printf("got it!\n");
 		}
 		// tell HPS that DMA is actually disabled
