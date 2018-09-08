@@ -176,10 +176,10 @@ class Framequeue:
         for bi in range(16):
             self.frames.append(np.memmap(udmabuf.mmap_path,
                 dtype=np.uint16, mode='r',
-                offset=256*1024*bi, shape=(258, 320)))
+                offset=256*1024*bi, shape=(256, 320)))
             self.histos.append(np.memmap(udmabuf.mmap_path,
                 dtype=np.uint32, mode='r',
-                offset=(256*1024*bi)+(320*258*2), shape=(256,)))
+                offset=(256*1024*bi)+(320*256*2), shape=(256,)))
                 
     def start(self):
         # make sure we're stopped

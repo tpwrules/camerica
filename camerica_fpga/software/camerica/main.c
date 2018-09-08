@@ -12,7 +12,7 @@
 #include "altera_avalon_dma_regs.h"
 
 #define CAM_PIXELS_PER_LINE (320)
-#define CAM_LINES_PER_FRAME (258)
+#define CAM_LINES_PER_FRAME (256)
 
 #define HW_REGS_BASE (0x22000)
 
