@@ -73,7 +73,7 @@ module linereader(
 	assign hr_vma_result = 
 		{5'b0, hr_vma_data_out[53:27],
 		 5'b0, hr_vma_data_out[26:0]};
-	assign vm_read_data = vm_address[7] ? hr_vma_result : lr_vma_result;
+	assign vm_read_data = vm_address[8] ? hr_vma_result : lr_vma_result;
 	
 	always @(posedge clk) begin
 		if (!rst) begin
