@@ -217,6 +217,10 @@ class Framequeue:
 		
 		result = []
 		
+		# invalidate CPU cache for the frame buffer area
+		# so we get the most up to date copy
+		self.udmabuf.flush_cache()
+		
 		while new_frames:
 			frame = self.frames[which_buf].copy()
 			histo = self.histos[which_buf].copy()
