@@ -45,6 +45,7 @@ while True:
             frame_surf = pygame.image.frombuffer(frame_data, (320, 258), "P")
             frame_surf.set_palette(palette)
             frame_surf = frame_surf.convert(disp)
+            pygame.image.save(frame_surf, "test.png")
     if event.type == pygame.QUIT:
         break
 
