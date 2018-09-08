@@ -75,11 +75,19 @@ module linereader(
 		 5'b0, hr_vma_data_out[26:0]};
 	assign vm_read_data = vm_address[8] ? hr_vma_result : lr_vma_result;
 	
+    // the reader asserts should_read, then we assert ack next cycle
+    // but the reader won't deassert should_read til the third cycle
+    // so we have to sense the rising edge of should_read so we don't
+    // generate a spurious ack
+    // this could be a state machine but eh
+    logic vma_just_read;
 	always @(posedge clk) begin
 		if (!rst) begin
-			vm_acknowledge <= vma_should_read;
+            vma_just_read <= vma_should_read;
+			vm_acknowledge <= (vma_should_read && !vma_just_read);
 		end else begin
 			vm_acknowledge <= 1'b0;
+            vma_just_read <= 1'b0;
 		end
 	end
 	
