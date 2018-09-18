@@ -66,12 +66,11 @@ int main() {
 			// tell the HPS that the DMA is enabled
 			IOWR_HW_REGS_CONTROL(
 				IORD_HW_REGS_CONTROL() | HW_REGS_CONTROL_DMA_ACTIVE);
-			// wait until the camera deasserts VBLANK and the frame is visible
-			frame_counter++;
-			while ((IORD_HW_REGS_STATUS() & HW_REGS_STATUS_VBLANK));
 			// dma to the start of a new frame in physical memory
-			uint32_t curr_line_addr_dest = ((frame_counter & 0xF) << 18) + 
+			uint32_t curr_line_addr_dest = ((frame_counter & 0xF) << 18) +
 				dma_phys_addr;
+			// wait until the camera deasserts VBLANK and the frame is visible
+			while ((IORD_HW_REGS_STATUS() & HW_REGS_STATUS_VBLANK));
 			for (int line=0; line<(CAM_LINES_PER_FRAME); line++) {
 				// configure the DMA controller while the frame is happening
 				// dma from the line that's currently being filled
@@ -97,7 +96,7 @@ int main() {
 			}
 			// copy the histogram over too, in the future
 			// write the updated frame count
-			IOWR_HW_REGS_FRAME_COUNTER(frame_counter);
+			IOWR_HW_REGS_FRAME_COUNTER(++frame_counter);
 			// and set the bit to tell the HPS
 			IOWR_HW_REGS_CONTROL(
 				IORD_HW_REGS_CONTROL() & HW_REGS_CONTROL_SET_FRAME_READY);
