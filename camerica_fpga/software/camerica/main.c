@@ -61,6 +61,7 @@ int main() {
 		while (!(IORD_HW_REGS_STATUS() & HW_REGS_STATUS_DMA_ENABLED));
 		uint32_t dma_phys_addr = IORD_HW_REGS_DMA_PHYS_ADDR();
 		alt_printf("the dma address: %x\n", dma_phys_addr);
+        while (!(IORD_HW_REGS_STATUS() & HW_REGS_STATUS_VBLANK));
 		// capture frames forever (or until HPS wants DMA disabled)
 		while ((IORD_HW_REGS_STATUS() & HW_REGS_STATUS_DMA_ENABLED)) {
 			// tell the HPS that the DMA is enabled
@@ -94,15 +95,26 @@ int main() {
 				// now wait for HBLANK to complete
 				while ((IORD_HW_REGS_STATUS() & HW_REGS_STATUS_HBLANK));
 			}
-			// copy the histogram over too, in the future
+            // wait for VBLANK to begin so the histogram is finished
+			while (!(IORD_HW_REGS_STATUS() & HW_REGS_STATUS_VBLANK));
+            // DMA from the histogram that was just completed
+            IOWR_ALTERA_AVALON_DMA_RADDRESS(VID_DMA_BASE,
+                (IORD_HW_REGS_STATUS() & HW_REGS_STATUS_WHICH_HISTO) ? 0x800 : 0xC00);
+            // and put it right after the frame data
+            IOWR_ALTERA_AVALON_DMA_WADDRESS(VID_DMA_BASE,
+                curr_line_addr_dest);
+            // write the length so the DMA controller starts working
+            IOWR_ALTERA_AVALON_DMA_LENGTH(VID_DMA_BASE, 1024);
+            // wait for the DMA controller to be finished
+            while (!(IORD_ALTERA_AVALON_DMA_STATUS(VID_DMA_BASE) &
+                ALTERA_AVALON_DMA_STATUS_DONE_MSK));
+            // and clear the DONE status
+            IOWR_ALTERA_AVALON_DMA_STATUS(VID_DMA_BASE, 0);
 			// write the updated frame count
 			IOWR_HW_REGS_FRAME_COUNTER(++frame_counter);
-			// and set the bit to tell the HPS
+			// and set the bit to tell the HPS a new frame is ready
 			IOWR_HW_REGS_CONTROL(
 				IORD_HW_REGS_CONTROL() & HW_REGS_CONTROL_SET_FRAME_READY);
-			// wait for VBLANK to begin, we don't do anything then
-			while (!(IORD_HW_REGS_STATUS() & HW_REGS_STATUS_VBLANK));
-			//alt_printf("got it!\n");
 		}
 		// tell HPS that DMA is actually disabled
 		IOWR_HW_REGS_CONTROL(IORD_HW_REGS_CONTROL() & ~HW_REGS_CONTROL_DMA_ACTIVE);
