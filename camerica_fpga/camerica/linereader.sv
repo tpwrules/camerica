@@ -168,7 +168,9 @@ module linereader(
 	
 	logic flip_which_histo;
 	logic [7:0] hram_clear_addr;
+    
 	logic [7:0] histo_curr_pix;
+    logic histo_chblank, histo_cvblank; // current h, vblank
 	
 	always @(posedge clk) begin
 		if (rst) begin
@@ -189,6 +191,8 @@ module linereader(
 		
 		if (vid_pixsync) begin
 			histo_curr_pix <= vid_pixel[11:4];
+            histo_chblank <= vid_hblank;
+            histo_cvblank <= vid_vblank;
 		end
 	end
 	
@@ -201,27 +205,27 @@ module linereader(
 		hnstate = hcstate;
 		flip_which_histo = 1'b0;
 		hr_wren = 1'b0;
-		hr_addr[7:0] = 8'b0;
+		hr_addr[7:0] = vid_pixel[11:4];
 		
 		case (hcstate)
 			HF_READ: begin
 				if (vid_pixsync) begin
-					if (vid_hblank) begin
-						hnstate = HF_HBLANK;
-					end else if (vid_vblank) begin
-						hnstate = HF_CLEAR_HRAM;
-						flip_which_histo = 1'b1;
-					end else begin
-						hr_addr[7:0] = vid_pixel[11:4];
-						hnstate = HF_WRITE;
-					end
+                    hnstate = HF_WRITE;
 				end
 			end
 			
 			HF_WRITE: begin
 				hr_addr[7:0] = histo_curr_pix;
 				hr_wren = 1'b1;
-				hnstate = HF_READ;
+                
+                if (histo_chblank) begin
+                    hnstate = HF_HBLANK;
+                end else if (histo_cvblank) begin
+                    hnstate = HF_CLEAR_HRAM;
+                    flip_which_histo = 1'b1;
+                end else begin
+                    hnstate = HF_READ;
+                end
 			end
 			
 			HF_HBLANK: begin
