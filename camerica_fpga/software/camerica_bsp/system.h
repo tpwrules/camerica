@@ -4,7 +4,7 @@
  * Machine generated for CPU 'nios2_gen2_0' in SOPC Builder design 'soc_system'
  * SOPC Builder design path: ../../soc_system.sopcinfo
  *
- * Generated: Wed Sep 05 15:57:13 CDT 2018
+ * Generated: Wed Sep 19 17:28:43 CDT 2018
  */
 
 /*
@@ -236,7 +236,7 @@
 #define NIOS_PROGRAM_IRQ -1
 #define NIOS_PROGRAM_IRQ_INTERRUPT_CONTROLLER_ID -1
 #define NIOS_PROGRAM_NAME "/dev/nios_program"
-#define NIOS_PROGRAM_NON_DEFAULT_INIT_FILE_ENABLED 0
+#define NIOS_PROGRAM_NON_DEFAULT_INIT_FILE_ENABLED 1
 #define NIOS_PROGRAM_RAM_BLOCK_TYPE "AUTO"
 #define NIOS_PROGRAM_READ_DURING_WRITE_MODE "DONT_CARE"
 #define NIOS_PROGRAM_SINGLE_CLOCK_OP 1
@@ -273,7 +273,7 @@
 #define SYSID_QSYS_IRQ_INTERRUPT_CONTROLLER_ID -1
 #define SYSID_QSYS_NAME "/dev/sysid_qsys"
 #define SYSID_QSYS_SPAN 8
-#define SYSID_QSYS_TIMESTAMP 1536109592
+#define SYSID_QSYS_TIMESTAMP 1537394890
 #define SYSID_QSYS_TYPE "altera_avalon_sysid_qsys"
 
 
