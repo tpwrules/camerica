@@ -1,13 +1,9 @@
-#include <string.h>
 #include <inttypes.h>
 
 // this system's definitions
 #include "system.h"
 
 #include "io.h"
-#include "sys/alt_stdio.h"
-#include "sys/alt_driver.h"
-#include "sys/alt_irq.h"
 
 #include "altera_avalon_dma_regs.h"
 
@@ -43,7 +39,6 @@
 	(IOWR(HW_REGS_BASE, HW_REGS_CONTROL, DATA))
 
 int main() {
-	alt_printf("Hello and welcome!\n");
 	uint32_t frame_counter = 0;
 	IOWR_HW_REGS_FRAME_COUNTER(0);
 	
@@ -60,7 +55,7 @@ int main() {
 		// wait until the HPS wants DMA to be enabled
 		while (!(IORD_HW_REGS_STATUS() & HW_REGS_STATUS_DMA_ENABLED));
 		uint32_t dma_phys_addr = IORD_HW_REGS_DMA_PHYS_ADDR();
-		alt_printf("the dma address: %x\n", dma_phys_addr);
+		// wait for vblank to start so we are synchronized with frame
         while (!(IORD_HW_REGS_STATUS() & HW_REGS_STATUS_VBLANK));
 		// capture frames forever (or until HPS wants DMA disabled)
 		while ((IORD_HW_REGS_STATUS() & HW_REGS_STATUS_DMA_ENABLED)) {
@@ -119,32 +114,5 @@ int main() {
 		// tell HPS that DMA is actually disabled
 		IOWR_HW_REGS_CONTROL(IORD_HW_REGS_CONTROL() & ~HW_REGS_CONTROL_DMA_ACTIVE);
 	}
-	while(1) {
-		uint32_t dma_phys_addr = IORD_HW_REGS_DMA_PHYS_ADDR();
-		alt_printf("current phys addr: %x\n", dma_phys_addr);
-		alt_getchar();
-	}
-	return 0;
 }
-
-	/*
-  IOWR_ALTERA_AVALON_DMA_LENGTH(DMA_0_BASE, 0);
-	IOWR_ALTERA_AVALON_DMA_CONTROL(DMA_0_BASE,
-			ALTERA_AVALON_DMA_CONTROL_WORD_MSK | // half-word (16 bit) transfers
-			ALTERA_AVALON_DMA_CONTROL_LEEN_MSK | // end transaction by length
-			ALTERA_AVALON_DMA_CONTROL_GO_MSK // and go!
-	);
-	*/
-
-  // register the linereader management interrupt
-  //alt_irq_register(LINEREADER_STATUS_REG_IRQ, 0, linereader_int);
-	//alt_ic_isr_register(LR_STATUS_IRQ_INTERRUPT_CONTROLLER_ID,
-     //   LR_STATUS_IRQ,
-	//		linereader_int, 0, 0);
-  // enable edge capture and ints of such
- // IOWR_ALTERA_AVALON_PIO_IRQ_MASK(LR_STATUS_BASE, CAM_HSYNC | CAM_VSYNC);
-
-  //while (1)
-//	  alt_printf("frames: %x\n", total_frames);
-
 
