@@ -22,10 +22,10 @@
 <td width="20%" bgcolor="#77BBFF">BSP Version:</td><td>default</td>
 </tr>
 <tr mode="wrap">
-<td width="20%" bgcolor="#77BBFF">BSP Generated On:</td><td>Sep 19, 2018 5:28:42 PM</td>
+<td width="20%" bgcolor="#77BBFF">BSP Generated On:</td><td>Sep 19, 2018 6:18:58 PM</td>
 </tr>
 <tr mode="wrap">
-<td width="20%" bgcolor="#77BBFF">BSP Generated Timestamp:</td><td>1537396122544</td>
+<td width="20%" bgcolor="#77BBFF">BSP Generated Timestamp:</td><td>1537399138440</td>
 </tr>
 <tr mode="wrap">
 <td width="20%" bgcolor="#77BBFF">BSP Generated Location:</td><td>C:\Users\thomas\Documents\merlin\de10std\camerica_fpga\software\camerica_bsp</td>
@@ -38,9 +38,6 @@
 <th align="left" width="20%">Slave Descriptor</th><th align="left" width="40%">Address Range</th><th align="left" width="20%">Size</th><th align="left" width="20%">Attributes</th>
 </tr>
 <tr mode="wrap" STYLE="display: 'block'; font-family: 'courier'; color: '#000000'; font-weight: '500'; font-size: '14'; margin-top: '10pt'; text-align: 'left'">
-<td>nios_comms</td><td>0x00023000 - 0x00023007</td><td>8</td><td class="listing">printable</td>
-</tr>
-<tr mode="wrap" STYLE="display: 'block'; font-family: 'courier'; color: '#000000'; font-weight: '500'; font-size: '14'; margin-top: '10pt'; text-align: 'left'">
 <td>nios_vid_regs</td><td>0x00022000 - 0x0002200F</td><td>16</td><td class="listing">&nbsp;</td>
 </tr>
 <tr mode="wrap" STYLE="display: 'block'; font-family: 'courier'; color: '#000000'; font-weight: '500'; font-size: '14'; margin-top: '10pt'; text-align: 'left'">
@@ -50,7 +47,7 @@
 <td>vid_dma</td><td>0x00020000 - 0x0002001F</td><td>32</td><td class="listing">&nbsp;</td>
 </tr>
 <tr mode="wrap" STYLE="display: 'block'; font-family: 'courier'; color: '#000000'; font-weight: '500'; font-size: '14'; margin-top: '10pt'; text-align: 'left'">
-<td>nios_program</td><td>0x00010000 - 0x00013FFF</td><td>16384</td><td class="listing">memory</td>
+<td>nios_program</td><td>0x00010000 - 0x000107FF</td><td>2048</td><td class="listing">memory</td>
 </tr>
 </table>
 <br>
@@ -87,61 +84,21 @@
 <td>.stack</td><td>nios_program</td>
 </tr>
 </table>
+<h3>Drivers</h3>
+<table border="1" bgcolor="#FFFFCC" width="90%">
+<tr bgcolor="#77BBFF" mode="wrap">
+<th align="left" width="15%">Module Name</th><th align="left" width="40%">Driver</th><th align="left" width="15%">Version</th>
+</tr>
+<tr mode="wrap" STYLE="display: 'block'; font-family: 'courier'; color: '#000000'; font-weight: '500'; font-size: '14'; margin-top: '10pt'; text-align: 'left'">
+<td>sysid_qsys</td><td>none</td><td></td>
+</tr>
+<tr mode="wrap" STYLE="display: 'block'; font-family: 'courier'; color: '#000000'; font-weight: '500'; font-size: '14'; margin-top: '10pt'; text-align: 'left'">
+<td>vid_dma</td><td>none</td><td></td>
+</tr>
+</table>
+<br>
+<br>
 <h3>Settings</h3>
-<table border="1" bgcolor="#FFFFCC" width="60%">
-<tr bgcolor="#77BBFF">
-<td align="left" width="15%">Setting Name:</td><td align="left">altera_avalon_jtag_uart_driver.enable_jtag_uart_ignore_fifo_full_error</td>
-</tr>
-<tr>
-<td width="20%">Identifier:</td><td>ALTERA_AVALON_JTAG_UART_IGNORE_FIFO_FULL_ERROR</td>
-</tr>
-<tr>
-<td width="20%">Default Value:</td><td>false</td>
-</tr>
-<tr>
-<td width="20%">Value:</td><td>false</td>
-</tr>
-<tr>
-<td width="20%">Type:</td><td>BooleanDefineOnly</td>
-</tr>
-<tr mode="wrap">
-<td width="20%">Destination:</td><td>public_mk_define</td>
-</tr>
-<tr mode="wrap">
-<td width="20%">Description:</td><td>Enable JTAG UART driver to recover when host is inactive causing buffer to full without returning error. Printf will not fail with this recovery.</td>
-</tr>
-<tr mode="wrap">
-<td width="20%">Restrictions:</td><td>none</td>
-</tr>
-</table>
-<br>
-<table border="1" bgcolor="#FFFFCC" width="60%">
-<tr bgcolor="#77BBFF">
-<td align="left" width="15%">Setting Name:</td><td align="left">altera_avalon_jtag_uart_driver.enable_small_driver</td>
-</tr>
-<tr>
-<td width="20%">Identifier:</td><td>ALTERA_AVALON_JTAG_UART_SMALL</td>
-</tr>
-<tr>
-<td width="20%">Default Value:</td><td>false</td>
-</tr>
-<tr>
-<td width="20%">Value:</td><td>true</td>
-</tr>
-<tr>
-<td width="20%">Type:</td><td>BooleanDefineOnly</td>
-</tr>
-<tr mode="wrap">
-<td width="20%">Destination:</td><td>public_mk_define</td>
-</tr>
-<tr mode="wrap">
-<td width="20%">Description:</td><td>Small-footprint (polled mode) driver</td>
-</tr>
-<tr mode="wrap">
-<td width="20%">Restrictions:</td><td>none</td>
-</tr>
-</table>
-<br>
 <table border="1" bgcolor="#FFFFCC" width="60%">
 <tr bgcolor="#77BBFF">
 <td align="left" width="15%">Setting Name:</td><td align="left">hal.custom_newlib_flags</td>
@@ -1962,7 +1919,7 @@
 <td width="20%">Default Value:</td><td>none</td>
 </tr>
 <tr>
-<td width="20%">Value:</td><td>nios_comms</td>
+<td width="20%">Value:</td><td>none</td>
 </tr>
 <tr>
 <td width="20%">Type:</td><td>UnquotedString</td>
@@ -1989,7 +1946,7 @@
 <td width="20%">Default Value:</td><td>none</td>
 </tr>
 <tr>
-<td width="20%">Value:</td><td>nios_comms</td>
+<td width="20%">Value:</td><td>none</td>
 </tr>
 <tr>
 <td width="20%">Type:</td><td>UnquotedString</td>
@@ -2016,7 +1973,7 @@
 <td width="20%">Default Value:</td><td>none</td>
 </tr>
 <tr>
-<td width="20%">Value:</td><td>nios_comms</td>
+<td width="20%">Value:</td><td>none</td>
 </tr>
 <tr>
 <td width="20%">Type:</td><td>UnquotedString</td>

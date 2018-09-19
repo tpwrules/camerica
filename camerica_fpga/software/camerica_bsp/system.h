@@ -4,7 +4,7 @@
  * Machine generated for CPU 'nios2_gen2_0' in SOPC Builder design 'soc_system'
  * SOPC Builder design path: ../../soc_system.sopcinfo
  *
- * Generated: Wed Sep 19 17:28:43 CDT 2018
+ * Generated: Wed Sep 19 18:01:03 CDT 2018
  */
 
 /*
@@ -134,7 +134,6 @@
  */
 
 #define __ALTERA_AVALON_DMA
-#define __ALTERA_AVALON_JTAG_UART
 #define __ALTERA_AVALON_ONCHIP_MEMORY2
 #define __ALTERA_AVALON_SYSID_QSYS
 #define __ALTERA_NIOS2_GEN2
@@ -147,7 +146,6 @@
  */
 
 #define ALT_DEVICE_FAMILY "Cyclone V"
-#define ALT_ENHANCED_INTERRUPT_API_PRESENT
 #define ALT_IRQ_BASE NULL
 #define ALT_LOG_PORT "/dev/null"
 #define ALT_LOG_PORT_BASE 0x0
@@ -156,24 +154,18 @@
 #define ALT_NUM_EXTERNAL_INTERRUPT_CONTROLLERS 0
 #define ALT_NUM_INTERNAL_INTERRUPT_CONTROLLERS 1
 #define ALT_NUM_INTERRUPT_CONTROLLERS 1
-#define ALT_STDERR "/dev/nios_comms"
-#define ALT_STDERR_BASE 0x23000
-#define ALT_STDERR_DEV nios_comms
-#define ALT_STDERR_IS_JTAG_UART
-#define ALT_STDERR_PRESENT
-#define ALT_STDERR_TYPE "altera_avalon_jtag_uart"
-#define ALT_STDIN "/dev/nios_comms"
-#define ALT_STDIN_BASE 0x23000
-#define ALT_STDIN_DEV nios_comms
-#define ALT_STDIN_IS_JTAG_UART
-#define ALT_STDIN_PRESENT
-#define ALT_STDIN_TYPE "altera_avalon_jtag_uart"
-#define ALT_STDOUT "/dev/nios_comms"
-#define ALT_STDOUT_BASE 0x23000
-#define ALT_STDOUT_DEV nios_comms
-#define ALT_STDOUT_IS_JTAG_UART
-#define ALT_STDOUT_PRESENT
-#define ALT_STDOUT_TYPE "altera_avalon_jtag_uart"
+#define ALT_STDERR "/dev/null"
+#define ALT_STDERR_BASE 0x0
+#define ALT_STDERR_DEV null
+#define ALT_STDERR_TYPE ""
+#define ALT_STDIN "/dev/null"
+#define ALT_STDIN_BASE 0x0
+#define ALT_STDIN_DEV null
+#define ALT_STDIN_TYPE ""
+#define ALT_STDOUT "/dev/null"
+#define ALT_STDOUT_BASE 0x0
+#define ALT_STDOUT_DEV null
+#define ALT_STDOUT_TYPE ""
 #define ALT_SYSTEM_NAME "soc_system"
 
 
@@ -201,24 +193,6 @@
 
 
 /*
- * nios_comms configuration
- *
- */
-
-#define ALT_MODULE_CLASS_nios_comms altera_avalon_jtag_uart
-#define NIOS_COMMS_BASE 0x23000
-#define NIOS_COMMS_IRQ 1
-#define NIOS_COMMS_IRQ_INTERRUPT_CONTROLLER_ID 0
-#define NIOS_COMMS_NAME "/dev/nios_comms"
-#define NIOS_COMMS_READ_DEPTH 64
-#define NIOS_COMMS_READ_THRESHOLD 8
-#define NIOS_COMMS_SPAN 8
-#define NIOS_COMMS_TYPE "altera_avalon_jtag_uart"
-#define NIOS_COMMS_WRITE_DEPTH 64
-#define NIOS_COMMS_WRITE_THRESHOLD 8
-
-
-/*
  * nios_program configuration
  *
  */
@@ -241,8 +215,8 @@
 #define NIOS_PROGRAM_READ_DURING_WRITE_MODE "DONT_CARE"
 #define NIOS_PROGRAM_SINGLE_CLOCK_OP 1
 #define NIOS_PROGRAM_SIZE_MULTIPLE 1
-#define NIOS_PROGRAM_SIZE_VALUE 16384
-#define NIOS_PROGRAM_SPAN 16384
+#define NIOS_PROGRAM_SIZE_VALUE 2048
+#define NIOS_PROGRAM_SPAN 2048
 #define NIOS_PROGRAM_TYPE "altera_avalon_onchip_memory2"
 #define NIOS_PROGRAM_WRITABLE 1
 
@@ -273,7 +247,7 @@
 #define SYSID_QSYS_IRQ_INTERRUPT_CONTROLLER_ID -1
 #define SYSID_QSYS_NAME "/dev/sysid_qsys"
 #define SYSID_QSYS_SPAN 8
-#define SYSID_QSYS_TIMESTAMP 1537394890
+#define SYSID_QSYS_TIMESTAMP 1537397708
 #define SYSID_QSYS_TYPE "altera_avalon_sysid_qsys"
 
 
