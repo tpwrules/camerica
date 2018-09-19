@@ -73,7 +73,8 @@ module linereader(
 	assign hr_vma_result = 
 		{5'b0, hr_vma_data_out[53:27],
 		 5'b0, hr_vma_data_out[26:0]};
-	assign vm_read_data = vm_address[8] ? hr_vma_result : lr_vma_result;
+    logic vma_which_mem;
+	assign vm_read_data = vma_which_mem ? hr_vma_result : lr_vma_result;
 	
     // the reader asserts should_read, then we assert ack next cycle
     // but the reader won't deassert should_read til the third cycle
@@ -85,9 +86,13 @@ module linereader(
 		if (!rst) begin
             vma_just_read <= vma_should_read;
 			vm_acknowledge <= (vma_should_read && !vma_just_read);
+            if (vma_should_read && !vma_just_read) begin
+                vma_which_mem <= vm_address[8];
+            end
 		end else begin
 			vm_acknowledge <= 1'b0;
             vma_just_read <= 1'b0;
+            vma_which_mem <= 1'b0;
 		end
 	end
 	
