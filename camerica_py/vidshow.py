@@ -41,6 +41,8 @@ while True:
 
             print(curr_frame)
             frame_data, histo_data = get_frame(curr_frame)
+            print(histo_data)
+            print(np.bincount(np.reshape(frame_data >> 8, 320*256)))
             frame_data = (frame_data >> 4).astype(np.uint8)
             frame_surf = pygame.image.frombuffer(frame_data, (320, 256), "P")
             frame_surf.set_palette(palette)
