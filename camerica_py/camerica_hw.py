@@ -186,10 +186,9 @@ class Framequeue:
         #self.stop()
         # write the latest physical addr to the hardware
         self.regs.dma_phys_addr = self.udmabuf.phys_addr
-        # save the current frame number so we can tell
-        # if new frames have arrived
-        self.last_frame_counter = self.regs.frame_counter
-        # and kick off the DMA
+        # we start at frame 0 when DMA is enabled
+        self.last_frame_counter = 0
+        # kick off the DMA
         self.regs.dma_enabled = True
         
     def stop(self):

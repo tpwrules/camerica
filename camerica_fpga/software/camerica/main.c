@@ -39,7 +39,6 @@
 	(IOWR(HW_REGS_BASE, HW_REGS_CONTROL, DATA))
 
 int main() {
-	uint32_t frame_counter = 0;
 	IOWR_HW_REGS_FRAME_COUNTER(0);
 	
 	// configure the DMA controller for doubleword transfers
@@ -54,10 +53,17 @@ int main() {
 	while (1) {
 		// wait until the HPS wants DMA to be enabled
 		while (!(IORD_HW_REGS_STATUS() & HW_REGS_STATUS_DMA_ENABLED));
+		// "latch" the DMA destination
 		uint32_t dma_phys_addr = IORD_HW_REGS_DMA_PHYS_ADDR();
+
+		// record how many frames we've captured so we know where
+		// to store and retrieve them
+		uint32_t frame_counter = 0;
+		IOWR_HW_REGS_FRAME_COUNTER(0);
+
 		// wait for vblank to start so we are synchronized with frame
         while (!(IORD_HW_REGS_STATUS() & HW_REGS_STATUS_VBLANK));
-		// capture frames forever (or until HPS wants DMA disabled)
+		// capture until HPS wants DMA disabled
 		while ((IORD_HW_REGS_STATUS() & HW_REGS_STATUS_DMA_ENABLED)) {
 			// tell the HPS that the DMA is enabled
 			IOWR_HW_REGS_CONTROL(
@@ -68,7 +74,7 @@ int main() {
 			// wait until the camera deasserts VBLANK and the frame is visible
 			while ((IORD_HW_REGS_STATUS() & HW_REGS_STATUS_VBLANK));
 			for (int line=0; line<(CAM_LINES_PER_FRAME); line++) {
-				// configure the DMA controller while the frame is happening
+				// configure the DMA controller while the line is happening
 				// dma from the line that's currently being filled
 				IOWR_ALTERA_AVALON_DMA_RADDRESS(VID_DMA_BASE,
 					(IORD_HW_REGS_STATUS() & HW_REGS_STATUS_WHICH_LINE) ? 0x400 : 0x000);
