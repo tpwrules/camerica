@@ -6,6 +6,7 @@ import threading
 import queue
 
 import numpy as np
+import random
 
 class VidfileWriter:
     def __init__(self, path, width, height, fps):
@@ -14,6 +15,8 @@ class VidfileWriter:
         self.height = height
         self.fps = fps
         self.pack_type = 0 # uncompressed
+        # random id so that files probably won't get crosslinked
+        self.file_id = random.randint(0, 2**64-1)
         
         self.is_open = True
         
@@ -22,6 +25,8 @@ class VidfileWriter:
         
         # open index file
         self.index_file = open(self.path+".idx", "wb")
+        # and save the file ID to it
+        self.index_file.write(struct.pack("<Q", self.file_id))
         
         # create queues for writer thread
         self.vf_bufs_to_write = queue.Queue()
@@ -170,12 +175,13 @@ class VidfileWriter:
             
         # open video file and write metadata to it
         self.vf_curr_file = open(name, "wb")
-        self.vf_curr_file.write(struct.pack("<5I",
+        self.vf_curr_file.write(struct.pack("<Q5I",
+            self.file_id,
             self.width,
             self.height,
             self.fps,
             self.pack_type,
-            self.vf_curr_file_num)) # file number
+            self.vf_curr_file_num))
                 
             
             
