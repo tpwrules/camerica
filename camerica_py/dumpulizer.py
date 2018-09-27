@@ -21,14 +21,12 @@ try:
         dropped += just_dropped
         for frame, histo in frame_data:
             vf.write(frames, frame, histo)
-            vf.write(frames, frame, histo)
-            vf.write(frames, frame, histo)
             frames += 1
         print("\rFrames: {:6d}    Dropped: {:6d}".format(frames, dropped), end="")
         sys.stdout.flush()
         time.sleep(0.03)
 except:
     fq.stop()
-    print("FLUSHING FILES. THIS WILL TAKE A BIT")
+    print("\nFLUSHING VIDFILE. THIS WILL TAKE A BIT.")
     vf.close()
     raise

@@ -6,7 +6,6 @@ import threading
 import queue
 
 import numpy as np
-import zstandard as zstd
 
 class VidfileWriter:
     def __init__(self, path, width, height, fps):
@@ -14,6 +13,8 @@ class VidfileWriter:
         self.width = width
         self.height = height
         self.fps = fps
+        self.pack_type = 0 # uncompressed
+        
         self.is_open = True
         
         self.vf_curr_file_num = 0
@@ -30,7 +31,7 @@ class VidfileWriter:
         # allocate write buffers
         self.vf_curr_buf = None
         self.vf_curr_bufi = 0
-        for x in range(8):
+        for x in range(10):
             # each buffer can hold 1 second of video
             frame_buf = np.empty(
                 (self.fps, self.height, self.width), dtype=np.uint16)
@@ -74,10 +75,10 @@ class VidfileWriter:
         
         # write this buffer out if it's full
         if self.vf_curr_bufi == self.fps:
-            self.vf_bufs_to_write.put((60, fbuf, hbuf))
+            self.vf_bufs_to_write.put((self.fps, fbuf, hbuf))
             self.vf_curr_buf = None
             
-    def close(self, raise_exc=True):
+    def close(self):
         if self.is_open is False:
             return
         self.is_open = False
@@ -146,19 +147,11 @@ class VidfileWriter:
             # so that we can add it to the index
             buf_pos = self.vf_curr_file.tell()
             
-            # create a new compressor for this chunk
-            cctx = zstd.ZstdCompressor(write_checksum=True)
-            
-            # and write the data into it
-            with cctx.stream_writer(self.vf_curr_file,
-                    size=self.fps*((320*256*2)+1028)+4) as cwriter:
-                cwriter.write(struct.pack("<I", nbuf))
-                cwriter.write(fbuf.data)
-                cwriter.write(hbuf.data)
-                cwriter.flush()
-                
-            del cctx
-                
+            # write the file data out
+            self.vf_curr_file.write(struct.pack("<I", nbuf))
+            self.vf_curr_file.write(fbuf.data)
+            self.vf_curr_file.write(hbuf.data)
+
             self.vf_curr_file.flush()
             
             # update the index file too
@@ -177,10 +170,11 @@ class VidfileWriter:
             
         # open video file and write metadata to it
         self.vf_curr_file = open(name, "wb")
-        self.vf_curr_file.write(struct.pack("<4I",
+        self.vf_curr_file.write(struct.pack("<5I",
             self.width,
             self.height,
             self.fps,
+            self.pack_type,
             self.vf_curr_file_num)) # file number
                 
             
