@@ -131,18 +131,6 @@ class VidfileWriter:
                 break
             nbuf, fbuf, hbuf = fbuf
             
-            # start a new file if we've gone over this one's size
-            if self.vf_curr_file.tell() > 3*1024*1024*1024:
-                # force it to be saved to disk
-                os.fsync(self.vf_curr_file.fileno())
-                self.vf_curr_file.close()
-                # force flush of index file too
-                os.fsync(self.index_file.fileno())
-                
-                # open a new file with a new name
-                self.vf_curr_file_num += 1
-                self.vf_start()
-            
             # save the current position in the file
             # so that we can add it to the index
             buf_pos = self.vf_curr_file.tell()
@@ -151,7 +139,10 @@ class VidfileWriter:
             self.vf_curr_file.write(struct.pack("<I", nbuf))
             self.vf_curr_file.write(fbuf.data)
             self.vf_curr_file.write(hbuf.data)
-
+            
+            # put the buffer on the empty queue now that we're done
+            self.vf_written_bufs.put((fbuf, hbuf))
+            
             self.vf_curr_file.flush()
             
             # update the index file too
@@ -159,8 +150,17 @@ class VidfileWriter:
                 self.vf_curr_file_num, buf_pos))
             self.index_file.flush()
             
-            # put the buffer on the empty queue now that we're done
-            self.vf_written_bufs.put((fbuf, hbuf))
+            # start a new file if we've gone over this one's size
+            if self.vf_curr_file.tell() > 3*1024*1024*1024:
+                # force current one to be saved to disk
+                os.fsync(self.vf_curr_file.fileno())
+                self.vf_curr_file.close()
+                # force flush of index file too
+                os.fsync(self.index_file.fileno())
+                
+                # open a new file with a new name
+                self.vf_curr_file_num += 1
+                self.vf_start()
                 
     def vf_start(self):
         if self.vf_curr_file_num == 0:
