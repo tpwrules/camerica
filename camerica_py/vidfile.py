@@ -151,8 +151,8 @@ class VidfileWriter:
             self.vf_curr_file.flush()
             
             # update the index file too
-            self.index_file.write(struct.pack("<II", 
-                self.vf_curr_file_num, buf_pos))
+            self.index_file.write(struct.pack("<3I", 
+                self.vf_curr_file_num, buf_pos, nbuf))
             self.index_file.flush()
             
             # start a new file if we've gone over this one's size
@@ -182,7 +182,4 @@ class VidfileWriter:
             self.fps,
             self.pack_type,
             self.vf_curr_file_num))
-                
-            
-            
-    
+ 
