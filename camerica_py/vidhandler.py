@@ -7,6 +7,7 @@ import time
 from enum import Enum
 
 import camerica_hw as hw
+import vidfile
 
 class VidHandler:
     def __init__(self, width, height, fps, bufs):
@@ -115,3 +116,62 @@ class VidLiveHandler(VidHandler):
             
             time.sleep(0.03) # avoid banging hardware
                 
+
+# live display of the video, without any recording or playback
+class VidRecordHandler(VidHandler):
+    def __init__(self, width, height, fps, bufs, fname):
+        # check that the hardware exists
+        if not hw.is_hardware_present():
+            raise ValueError("hardware missing")
+            
+        super().__init__(width, height, fps, bufs)
+        
+        # instantiate the hardware and video buffer
+        self.hw_regs = hw.Registers()
+        self.udmabuf = hw.UDMABuf("udmabuf0")
+        # and the framebuffer attached to the hardware
+        self.fq = hw.Framequeue(self.udmabuf, self.hw_regs)
+        
+        # save also the current frame progress
+        self.total_frames = 0
+        self.dropped_frames = 0
+        
+        # and create a vidfile to save the recording in
+        self.vf = vidfile.VidfileWriter(fname, width, height, fps)
+        
+        # now start up the handler thread
+        self.handler_thread.start()
+        
+    def stop(self):
+        if not self.is_running:
+            return
+        self.vf.close()
+        super().stop()
+    
+    def handler(self):
+        # start capturing frames
+        self.fq.start()
+        terminated = False
+        while not terminated:
+            # process any commands
+            try:
+                while not self.h_cmds.empty():
+                    cmd = self.h_cmds.get(block=False)
+                    if cmd[0] == "terminate":
+                        terminated = True
+                        break
+            except queue.Empty:
+                pass
+                
+            # and any frames from hardware
+            frame_data, just_dropped = self.fq.get_new_frames()
+            if len(frame_data) > 0:
+                self.dropped_frames += just_dropped
+                for frame, histo in frame_data:
+                    self.vf.write(self.total_frames, frame, histo)
+                    self.total_frames += 1
+                with self.buf_lock:
+                    np.copyto(self.framebuf, frame_data[-1][0])
+                    np.copyto(self.histobuf, frame_data[-1][1])
+            
+            time.sleep(0.03) # avoid banging hardware

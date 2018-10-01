@@ -31,8 +31,8 @@ histo_surf = pygame.image.frombuffer(histo_pix, (512, 64), "P")
 histo_surf.set_palette(palette)
 
 # construct the live video handler
-handler = vidhandler.VidLiveHandler(320, 256, 60, 
-    (framebuf_handler, histobuf_handler))
+handler = vidhandler.VidRecordHandler(320, 256, 60, 
+    (framebuf_handler, histobuf_handler), sys.argv[1])
     
 frames = 0
     
@@ -118,7 +118,7 @@ try:
         
         frames += 1
         if frames % 30 == 0:
-            print(clock.get_fps())
+            print(clock.get_fps(), handler.dropped_frames)
         
         pygame.display.flip()
         clock.tick(30)
