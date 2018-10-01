@@ -21,6 +21,7 @@ try:
         dropped += just_dropped
         for frame, histo in frame_data:
             vf.write(frames, frame, histo)
+            vf.write(frames, frame, histo)
             frames += 1
         print("\rFrames: {:6d}    Dropped: {:6d}".format(frames, dropped), end="")
         sys.stdout.flush()

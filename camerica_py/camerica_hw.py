@@ -17,6 +17,10 @@ if CAMERICA_REG_BASE % mmap.ALLOCATIONGRANULARITY != 0:
     raise Exception(("CAMERICA_REG_BASE (0x{:08X}) doesn't line "+
         "up with ALLOCATIONGRANULARITY ({}). This shouldn't happen!").format(
         CAMERICA_REG_BASE, mmap.ALLOCATIONGRANULARITY))
+        
+def is_hardware_present():
+    # we really should check...
+    return True
 
 # map the camerica hardware registers, then
 # provide a way to access them easily
