@@ -17,7 +17,7 @@ framebuf = np.empty((256*2, 320*2), dtype=np.uint8)
 histobuf = np.empty((1, 256), dtype=np.uint32)
 
 histo_levels = np.empty((1, 64), dtype=np.uint32)
-histo_pix = np.empty((64, 256), dtype=np.uint8)
+histo_pix = np.empty((64, 512), dtype=np.uint8)
 
 # make a surface with the current frame as its backing
 palette = [(c, c, c) for c in range(256)]
@@ -25,7 +25,7 @@ frame_surf = pygame.image.frombuffer(framebuf, (320*2, 256*2), "P")
 frame_surf.set_palette(palette)
 
 # and one for the histogram too
-histo_surf = pygame.image.frombuffer(histo_pix, (256, 64), "P")
+histo_surf = pygame.image.frombuffer(histo_pix, (512, 64), "P")
 histo_surf.set_palette(palette)
 
 # construct the live video handler
@@ -66,9 +66,11 @@ try:
         # the levels mean the pixel should be on in this row
         levels = np.linspace(0, hmax, 64, endpoint=False, dtype=np.uint32)
         levels.shape = (64, 1)
-        histo_pix[:] = (histobuf > levels)*255
+        histo_data = (histobuf > levels)*255
+        histo_pix[:, 0:511:2] = histo_data
+        histo_pix[:, 1:512:2] = histo_data
         
-        disp.blit(histo_surf, (0, 512+8))
+        disp.blit(histo_surf, ((640-512)/2, 512+8))
         
         frames += 1
         if frames % 30 == 0:
