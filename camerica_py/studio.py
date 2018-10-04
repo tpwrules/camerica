@@ -2,6 +2,9 @@ import sys
 import pygame
 import numpy as np
 
+import stacktracer
+stacktracer.trace_start("trace.html",interval=5,auto=True)
+
 import vidhandler
 
 # launch the display and pygame stuff
@@ -37,7 +40,10 @@ if mode == "live":
         (framebuf_handler, histobuf_handler))
 elif mode == "record":
     handler = vidhandler.VidRecordHandler(320, 256, 60, 
-        (framebuf_handler, histobuf_handler), sys.argv[1])
+        (framebuf_handler, histobuf_handler), sys.argv[2])
+elif mode == "playback":
+    handler = vidhandler.VidPlaybackHandler(320, 256, 60,
+        (framebuf_handler, histobuf_handler), sys.argv[2])
     
 frames = 0
     
@@ -59,9 +65,18 @@ try:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 break
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_SPACE and mode == "playback":
+                    handler.playpause()
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 pos = pygame.mouse.get_pos()
-                if pos[1] < 512+8: continue
+                if pos[1] < 512+8:
+                    if mode != "playback":
+                        continue
+                    # handle seek request
+                    target = pos[0]*handler.vf.total_frames//640
+                    handler.seek(target)
+                    continue
                 xpos = pos[0]
                 if xpos < (640-512)/2:
                     xpos = (640-512)/2
@@ -124,5 +139,6 @@ try:
         pygame.display.update()
         clock.tick(30)
 finally:
-    handler.stop()
+    pass
+    #handler.stop()
     

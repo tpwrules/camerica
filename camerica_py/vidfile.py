@@ -204,6 +204,7 @@ class VidfileReader:
             
         # attempt to open and read the index
         self.seek_disabled_reason = None
+        self.total_frames = None
         try:
             indexf = open(self.path+".idx", "rb")
             index_id, = struct.unpack("<Q", indexf.read(8))
@@ -217,14 +218,13 @@ class VidfileReader:
                 if len(record) != 8:
                     raise ValueError("index is not complete")
                 self.seek_table.append(struct.unpack("<II", record))
+            self.total_frames = len(self.seek_table)*self.fps
         except Exception as e:
             self.seek_disabled_reason = str(e)
             
         # create queues and events for reader thread
         self.vf_bufs_to_read = queue.Queue()
         self.vf_read_bufs = queue.Queue()
-        self.should_be_reading = threading.Event()
-        self.stopped_reading = threading.Event()
         self.vf_exception = None
             
         # allocate read buffers
@@ -278,23 +278,32 @@ class VidfileReader:
             raise ValueError("attempted to seek on closed Vidfile")
         if frame == 0:
             # just rewind back to the beginning
-            self.should_be_reading.clear()
-            #self.vf_bufs_to_read.join()
             
-            # all the bufs need refilling
+            # we have to reread all the buffers
+            # get all the buffers waiting to be read
+            bufs = []
             try:
                 while True:
-                    self.vf_bufs_to_read.put(
-                        self.vf_read_bufs.get(block=False))
+                    bufs.append(self.vf_bufs_to_read.get(block=False))
+                    self.vf_bufs_to_read.task_done()
+            except queue.Empty:
+                pass
+            # wait for any we didn't catch to be processed
+            self.vf_bufs_to_read.join()
+            # pull out the bufs that have been read also
+            try:
+                while True:
+                    bufs.append(self.vf_read_bufs.get(block=False)[1])
             except queue.Empty:
                 pass
                 
-            # and we need to reopen the file
+            # we need to reopen the first file
             self.vf_curr_file.close()
             self.vf_open(0)
             
-            # and let the video reader get back to work
-            self.should_be_reading.set()
+            # now put the buffers back so the video reader does its job
+            for buf in bufs:
+                self.vf_bufs_to_read.put(buf)
             # read one buffer to make sure playback won't immediately lag
             self.vf_curr_buf_frames, self.vf_curr_buf = \
                 self.vf_read_bufs.get()
@@ -320,17 +329,26 @@ class VidfileReader:
             return
             
         # ah well, discard what we have
-        # tell the frame reader to stop as all its work is in vain
-        self.should_be_reading.clear()
-        self.vf_bufs_to_read.join()
-        
-        # all the bufs need refilling
+        # get all the buffers waiting to be read
+        bufs = []
         try:
             while True:
-                self.vf_bufs_to_read.put(
-                    self.vf_read_bufs.get(block=False))
+                bufs.append(self.vf_bufs_to_read.get(block=False))
+                self.vf_bufs_to_read.task_done()
         except queue.Empty:
             pass
+        # wait for any we didn't catch to be processed
+        self.vf_bufs_to_read.join()
+        # pull out the bufs that have been read also
+        try:
+            while True:
+                bufs.append(self.vf_read_bufs.get(block=False)[1])
+        except queue.Empty:
+            pass
+        # don't forget the buf currently being worked on!!!
+        if self.vf_curr_buf is not None:
+            bufs.append(self.vf_curr_buf)
+            self.vf_curr_buf = None
             
         # open the correct file
         fn, fpos = self.seek_table[frame//self.fps]
@@ -339,8 +357,9 @@ class VidfileReader:
             self.vf_open(fn)
         self.vf_curr_file.seek(fpos)
         
-        # and let the video reader get back to work
-        self.should_be_reading.set()
+        # now put the buffers back so the video reader does its job
+        for buf in bufs:
+            self.vf_bufs_to_read.put(buf)
         # read one buffer to make sure playback won't immediately lag
         self.vf_curr_buf_frames, self.vf_curr_buf = \
             self.vf_read_bufs.get()
@@ -352,7 +371,6 @@ class VidfileReader:
             return
         self.is_open = False
         self.vf_bufs_to_read.put(None) # tell thread to exit
-        self.should_be_reading.set()
         self.vf_reader_thread.join()
         
         # delete our buffers to free up memory
@@ -362,24 +380,21 @@ class VidfileReader:
         del self.vf_read_bufs
         
     def start_vf_reader(self):
-        try:
-            self.vf_reader()
-        except Exception as e:
-            self.vf_exception = e
+        self.vf_reader()
             
     def vf_reader(self):
         while True:
-            # make sure we're allowed to read
-            self.should_be_reading.wait()
-            
             bufs = self.vf_bufs_to_read.get()
-            if bufs == None: # asked kindly to exit
+            if bufs is None: # asked kindly to exit
+                self.vf_bufs_to_read.task_done()
                 break
             fbuf, hbuf = bufs
             
             nbufbytes = self.vf_curr_file.read(4)
             if len(nbufbytes) == 0: # must have hit EOF
                 self.vf_curr_file_num += 1
+                if self.vf_curr_file is not None:
+                    self.vf_curr_file.close()
                 self.vf_open(self.vf_curr_file_num)
                 nbufbytes = self.vf_curr_file.read(4)
             
