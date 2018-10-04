@@ -145,8 +145,10 @@ class VidRecordHandler(VidHandler):
     def stop(self):
         if not self.is_running:
             return
-        self.vf.close()
-        super().stop()
+        try:
+            super().stop()
+        finally:
+            self.vf.close()
     
     def handler(self):
         # start capturing frames
@@ -165,8 +167,8 @@ class VidRecordHandler(VidHandler):
                 
             # and any frames from hardware
             frame_data, just_dropped = self.fq.get_new_frames()
+            self.dropped_frames += just_dropped
             if len(frame_data) > 0:
-                self.dropped_frames += just_dropped
                 for frame, histo in frame_data:
                     self.vf.write(self.total_frames, frame, histo)
                     self.total_frames += 1

@@ -120,7 +120,7 @@ try:
         if frames % 30 == 0:
             print(clock.get_fps(), handler.dropped_frames)
         
-        pygame.display.flip()
+        pygame.display.update()
         clock.tick(30)
 finally:
     handler.stop()
