@@ -304,7 +304,7 @@ vga_pll  vga_pll_inst(
 
 	// vid mem access
 	logic vm_acknowledge;
-	logic [11:0] vm_address;
+	logic [12:0] vm_address;
 	logic vm_bus_enable;
 	logic vm_rw;
 	logic [63:0] vm_read_data;
@@ -335,7 +335,7 @@ vga_pll  vga_pll_inst(
 		.hr_read_data(hr_read_data),
 		
 		.vm_acknowledge(vm_acknowledge),
-		.vm_address(vm_address[11:3]),
+		.vm_address(vm_address[12:3]),
 		.vm_bus_enable(vm_bus_enable),
 		.vm_rw(vm_rw),
 		.vm_read_data(vm_read_data)

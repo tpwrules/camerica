@@ -11,7 +11,7 @@ module linereader(
 
 	// video memory access
 	output logic vm_acknowledge,
-	input logic [8:0] vm_address,
+	input logic [9:0] vm_address,
 	input logic vm_bus_enable,
 	input logic vm_rw,
 	output logic [63:0] vm_read_data,
@@ -23,8 +23,8 @@ module linereader(
 	
 	// instantiate the two memories
 	logic [11:0] lr_data_in;
-	logic [7:0] lr_vma_addr;
-	logic [9:0] lr_addr;
+	logic [8:0] lr_vma_addr;
+	logic [10:0] lr_addr;
 	logic lr_wren;
 	logic [47:0] lr_vma_data_out;
 	line_ram line_ram(
@@ -38,11 +38,11 @@ module linereader(
 	);
 	
 	logic hr_wren;
-	logic [8:0] hr_addr;
+	logic [9:0] hr_addr;
 	logic [26:0] hr_data_in;
 	logic [26:0] hr_data_out;
 	
-	logic [7:0] hr_vma_addr;
+	logic [8:0] hr_vma_addr;
 	logic [53:0] hr_vma_data_out;
 	
 	histo_ram histo_ram(
@@ -59,8 +59,8 @@ module linereader(
 	);
 	
 	// logic to allow video memory to be read
-	assign lr_vma_addr = vm_address[7:0];
-	assign hr_vma_addr = vm_address[7:0];
+	assign lr_vma_addr = vm_address[8:0];
+	assign hr_vma_addr = vm_address[8:0];
 	logic vma_should_read;
 	assign vma_should_read = vm_rw && vm_bus_enable;
 	logic [63:0] lr_vma_result;
@@ -87,7 +87,7 @@ module linereader(
             vma_just_read <= vma_should_read;
 			vm_acknowledge <= (vma_should_read && !vma_just_read);
             if (vma_should_read && !vma_just_read) begin
-                vma_which_mem <= vm_address[8];
+                vma_which_mem <= vm_address[9];
             end
 		end else begin
 			vm_acknowledge <= 1'b0;
@@ -99,14 +99,14 @@ module linereader(
 	typedef enum logic [1:0] {VF_VBLANK, VF_HBLANK, VF_VISIBLE} vid_fsm_t;
 	vid_fsm_t vcstate, vnstate;
 	
-	logic [8:0] xpos;
+	logic [9:0] xpos;
 	
 	logic flip_which_line;
 	
 	always @(posedge clk) begin
 		if (rst) begin
 			vcstate <= VF_VBLANK;
-			xpos <= 9'd0;
+			xpos <= 10'd0;
 		end else begin
 			vcstate <= vnstate;
 		end
@@ -167,9 +167,9 @@ module linereader(
 	histo_fsm_t hcstate, hnstate;
 	
 	logic flip_which_histo;
-	logic [7:0] hram_clear_addr;
+	logic [8:0] hram_clear_addr;
     
-	logic [7:0] histo_curr_pix;
+	logic [8:0] histo_curr_pix;
     logic histo_chblank, histo_cvblank; // current h, vblank
 	
 	always @(posedge clk) begin
@@ -190,7 +190,7 @@ module linereader(
 		end
 		
 		if (vid_pixsync) begin
-			histo_curr_pix <= vid_pixel[11:4];
+			histo_curr_pix <= vid_pixel[11:3];
             histo_chblank <= vid_hblank;
             histo_cvblank <= vid_vblank;
 		end
@@ -199,13 +199,13 @@ module linereader(
 	
 	assign hr_data_in = (hcstate == HF_CLEAR_HRAM) ? 27'd0 :
 		(hr_data_out + 1'd1);
-	assign hr_addr[8] = status_which_histo;
+	assign hr_addr[9] = status_which_histo;
 	
 	always @(*) begin
 		hnstate = hcstate;
 		flip_which_histo = 1'b0;
 		hr_wren = 1'b0;
-		hr_addr[7:0] = vid_pixel[11:4];
+		hr_addr[8:0] = vid_pixel[11:3];
 		
 		case (hcstate)
 			HF_READ: begin
@@ -215,7 +215,7 @@ module linereader(
 			end
 			
 			HF_WRITE: begin
-				hr_addr[7:0] = histo_curr_pix;
+				hr_addr[8:0] = histo_curr_pix;
 				hr_wren = 1'b1;
                 
                 if (histo_chblank) begin
@@ -246,9 +246,9 @@ module linereader(
 			end
 			
 			HF_CLEAR_HRAM: begin
-				hr_addr[7:0] = hram_clear_addr;
+				hr_addr[8:0] = hram_clear_addr;
 				hr_wren = 1'b1;
-				if (hram_clear_addr == 8'hff) begin
+				if (hram_clear_addr == 9'h1ff) begin
 					hnstate = HF_VBLANK;
 				end
 			end

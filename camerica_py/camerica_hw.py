@@ -183,7 +183,7 @@ class Framequeue:
                 offset=256*1024*bi, shape=(256, 320)))
             self.histos.append(np.memmap(udmabuf.mmap_path,
                 dtype=np.uint32, mode='r',
-                offset=(256*1024*bi)+(320*256*2), shape=(256,)))
+                offset=(256*1024*bi)+(320*256*2), shape=(512,)))
                 
     def start(self):
         # make sure we're stopped

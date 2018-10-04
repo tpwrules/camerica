@@ -4,7 +4,7 @@
  * Machine generated for CPU 'nios2_gen2_0' in SOPC Builder design 'soc_system'
  * SOPC Builder design path: ../../soc_system.sopcinfo
  *
- * Generated: Wed Sep 19 18:01:03 CDT 2018
+ * Generated: Thu Oct 04 09:30:52 CDT 2018
  */
 
 /*
@@ -247,7 +247,7 @@
 #define SYSID_QSYS_IRQ_INTERRUPT_CONTROLLER_ID -1
 #define SYSID_QSYS_NAME "/dev/sysid_qsys"
 #define SYSID_QSYS_SPAN 8
-#define SYSID_QSYS_TIMESTAMP 1537397708
+#define SYSID_QSYS_TIMESTAMP 1538662766
 #define SYSID_QSYS_TYPE "altera_avalon_sysid_qsys"
 
 
@@ -265,7 +265,7 @@
 #define VID_DMA_BASE 0x20000
 #define VID_DMA_IRQ 2
 #define VID_DMA_IRQ_INTERRUPT_CONTROLLER_ID 0
-#define VID_DMA_LENGTHWIDTH 11
+#define VID_DMA_LENGTHWIDTH 12
 #define VID_DMA_MAX_BURST_SIZE 128
 #define VID_DMA_NAME "/dev/vid_dma"
 #define VID_DMA_SPAN 32
@@ -281,7 +281,7 @@
 #define VID_DMA_READ_MASTER_VID_MEM_BRIDGE_IRQ -1
 #define VID_DMA_READ_MASTER_VID_MEM_BRIDGE_IRQ_INTERRUPT_CONTROLLER_ID -1
 #define VID_DMA_READ_MASTER_VID_MEM_BRIDGE_NAME "/dev/vid_mem_bridge"
-#define VID_DMA_READ_MASTER_VID_MEM_BRIDGE_SPAN 4096
+#define VID_DMA_READ_MASTER_VID_MEM_BRIDGE_SPAN 8192
 #define VID_DMA_READ_MASTER_VID_MEM_BRIDGE_TYPE "altera_up_avalon_to_external_bus_bridge"
 
 #endif /* __SYSTEM_H_ */

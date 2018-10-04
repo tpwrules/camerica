@@ -77,7 +77,7 @@ int main() {
 				// configure the DMA controller while the line is happening
 				// dma from the line that's currently being filled
 				IOWR_ALTERA_AVALON_DMA_RADDRESS(VID_DMA_BASE,
-					(IORD_HW_REGS_STATUS() & HW_REGS_STATUS_WHICH_LINE) ? 0x400 : 0x000);
+					(IORD_HW_REGS_STATUS() & HW_REGS_STATUS_WHICH_LINE) ? 0x800 : 0x000);
 				// and to the next line in physical memory
 				IOWR_ALTERA_AVALON_DMA_WADDRESS(VID_DMA_BASE,
 					curr_line_addr_dest);
@@ -100,12 +100,12 @@ int main() {
 			while (!(IORD_HW_REGS_STATUS() & HW_REGS_STATUS_VBLANK));
             // DMA from the histogram that was just completed
             IOWR_ALTERA_AVALON_DMA_RADDRESS(VID_DMA_BASE,
-                (IORD_HW_REGS_STATUS() & HW_REGS_STATUS_WHICH_HISTO) ? 0x800 : 0xC00);
+                (IORD_HW_REGS_STATUS() & HW_REGS_STATUS_WHICH_HISTO) ? 0x1000 : 0x1800);
             // and put it right after the frame data
             IOWR_ALTERA_AVALON_DMA_WADDRESS(VID_DMA_BASE,
                 curr_line_addr_dest);
             // write the length so the DMA controller starts working
-            IOWR_ALTERA_AVALON_DMA_LENGTH(VID_DMA_BASE, 1024);
+            IOWR_ALTERA_AVALON_DMA_LENGTH(VID_DMA_BASE, 2048);
             // wait for the DMA controller to be finished
             while (!(IORD_ALTERA_AVALON_DMA_STATUS(VID_DMA_BASE) &
                 ALTERA_AVALON_DMA_STATUS_DONE_MSK));

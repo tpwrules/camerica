@@ -41,7 +41,7 @@ class VidfileWriter:
             frame_buf = np.empty(
                 (self.fps, self.height, self.width), dtype=np.uint16)
             histo_buf = np.empty(
-                (self.fps, 257), dtype=np.uint32)
+                (self.fps, 513), dtype=np.uint32)
             self.vf_written_bufs.put((frame_buf, histo_buf))
         
         # and start said thread up
@@ -73,8 +73,8 @@ class VidfileWriter:
         fi = self.vf_curr_bufi
         
         fbuf[fi, :, :] = frame
-        hbuf[fi, :256] = histo
-        hbuf[fi, 256] = frame_num
+        hbuf[fi, :512] = histo
+        hbuf[fi, 512] = frame_num
         
         self.vf_curr_bufi += 1
         
@@ -237,7 +237,7 @@ class VidfileReader:
             frame_buf = np.empty(
                 (self.fps, self.height, self.width), dtype=np.uint16)
             histo_buf = np.empty(
-                (self.fps, 257), dtype=np.uint32)
+                (self.fps, 513), dtype=np.uint32)
             self.vf_bufs_to_read.put((frame_buf, histo_buf))
          
         # start reading in separate thread
@@ -260,8 +260,8 @@ class VidfileReader:
         # copy from the buffer into the user's
         fbuf, hbuf = self.vf_curr_buf
         np.copyto(frame, fbuf[self.vf_curr_bufi, :, :])
-        np.copyto(histo, hbuf[self.vf_curr_bufi, :256])
-        frame_num = hbuf[self.vf_curr_bufi, 256]
+        np.copyto(histo, hbuf[self.vf_curr_bufi, :512])
+        frame_num = hbuf[self.vf_curr_bufi, 512]
         self.vf_curr_bufi += 1
         self.vf_curr_frame += 1
         

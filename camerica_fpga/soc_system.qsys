@@ -31,7 +31,7 @@
       }
       datum sopceditor_expanded
       {
-         value = "0";
+         value = "1";
          type = "boolean";
       }
    }
@@ -1141,11 +1141,11 @@
   <parameter name="avalonSpec" value="2.0" />
   <parameter name="bigEndian" value="false" />
   <parameter name="burstEnable" value="false" />
-  <parameter name="fifoDepth" value="32" />
+  <parameter name="fifoDepth" value="8" />
   <parameter name="maxBurstSize" value="128" />
-  <parameter name="minimumDmaTransactionRegisterWidth" value="11" />
-  <parameter name="readAddressMap"><![CDATA[<address-map><slave name='vid_mem_bridge.avalon_slave' start='0x0' end='0x1000' /></address-map>]]></parameter>
-  <parameter name="readSlaveAddressWidthMax" value="12" />
+  <parameter name="minimumDmaTransactionRegisterWidth" value="12" />
+  <parameter name="readAddressMap"><![CDATA[<address-map><slave name='vid_mem_bridge.avalon_slave' start='0x0' end='0x2000' /></address-map>]]></parameter>
+  <parameter name="readSlaveAddressWidthMax" value="13" />
   <parameter name="readSlaveDataWidthMax" value="64" />
   <parameter name="softresetEnable" value="false" />
   <parameter name="useRegistersForFIFO" value="false" />
@@ -1160,7 +1160,7 @@
    enabled="1">
   <parameter name="AUTO_CLK_CLOCK_RATE" value="50000000" />
   <parameter name="AUTO_DEVICE_FAMILY" value="Cyclone V" />
-  <parameter name="addr_size" value="4" />
+  <parameter name="addr_size" value="8" />
   <parameter name="addr_size_multiplier" value="Kbytes" />
   <parameter name="data_size" value="64" />
  </module>

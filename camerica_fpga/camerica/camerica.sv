@@ -32,7 +32,7 @@ module camerica (
 	
 	// vid mem access
 	output logic vm_acknowledge,
-	input logic [8:0] vm_address,
+	input logic [9:0] vm_address,
 	input logic vm_bus_enable,
 	input logic vm_rw,
 	output logic [63:0] vm_read_data
