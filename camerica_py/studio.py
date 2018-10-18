@@ -113,8 +113,8 @@ try:
         handler.unlock_frame()  
         # perform user requested value scaling
         framebuf -= int(histo_min_pix*128)
-        framebuf *= int(512/(histo_max_pix-histo_min_pix))
-        framebuf >>= 8
+        framebuf *= int((512*128)/(histo_max_pix-histo_min_pix))
+        framebuf >>= 15
         np.clip(framebuf, 0, 255, out=framebuf)
         scale(frame_pix, framebuf, 2)
         # and finally blit it to the screen
