@@ -139,6 +139,5 @@ try:
         pygame.display.update()
         clock.tick(30)
 finally:
-    pass
-    #handler.stop()
+    handler.stop()
     
