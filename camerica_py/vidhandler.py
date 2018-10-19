@@ -191,6 +191,9 @@ class VidPlaybackHandler(VidHandler):
         
         # create the vidfile that the recording comes from
         self.vf = vidfile.VidfileReader(fname)
+        self.total_frames = self.vf.total_frames
+        self.curr_frame = 0
+        self.cam_frame = 0
         
         # now start up the handler thread
         self.handler_thread.start()
@@ -211,6 +214,7 @@ class VidPlaybackHandler(VidHandler):
     
     def handler(self):
         terminated = False
+        do_next_frame = False
         while not terminated:
             # process any commands
             try:
@@ -220,16 +224,10 @@ class VidPlaybackHandler(VidHandler):
                         terminated = True
                     elif cmd[0] == "seek":
                         self.vf.seek(cmd[1])
-                        with self.buf_lock:
-                            play_pos = self.vf.next_frame(self.framebuf,
-                                                self.histobuf)
-                            if play_pos is None:
-                                self.playing = False
-                            else:
-                                self.play_pos = play_pos
+                        do_next_frame = True
                     elif cmd[0] == "playpause":
                         self.playing = not self.playing
-                        if self.play_pos is None:
+                        if self.curr_frame == self.total_frames-1:
                             self.playing = False
                     self.h_cmds.task_done()
             except queue.Empty:
@@ -239,13 +237,12 @@ class VidPlaybackHandler(VidHandler):
                 break
                 
             # and read the latest frame
-            if self.playing:
+            if self.playing or do_next_frame:
+                do_next_frame = False
                 with self.buf_lock:
-                    play_pos = self.vf.next_frame(self.framebuf,
-                                        self.histobuf)
-                    if play_pos is None:
-                        self.playing = False
-                    else:
-                        self.play_pos = play_pos
+                    self.cam_frame, self.curr_frame = self.vf.next_frame(
+                        self.framebuf, self.histobuf)
+                if self.curr_frame == self.total_frames-1:
+                    self.playing = False
             
             time.sleep(1/self.fps) # wait one frame time (needs to be fixed)

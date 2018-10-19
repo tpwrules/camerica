@@ -260,8 +260,8 @@ class VidfileReader:
     def next_frame(self, frame, histo):
         if not self.is_open:
             raise ValueError("attempted to read from closed Vidfile")
-        if self.vf_curr_frame == self.total_frames-1:
-            return None
+        if self.vf_curr_frame == self.total_frames:
+            raise ValueError("attempt to get frame after vidfile ends")
             
         # get a new buffer, if necessary
         if self.vf_curr_buf is None:
@@ -273,10 +273,9 @@ class VidfileReader:
         fbuf, hbuf = self.vf_curr_buf
         np.copyto(frame, fbuf[self.vf_curr_bufi, :, :])
         np.copyto(histo, hbuf[self.vf_curr_bufi, :512])
-        frame_num = hbuf[self.vf_curr_bufi, 512]
+        cam_frame = hbuf[self.vf_curr_bufi, 512]
         self.vf_curr_bufi += 1
-        if self.vf_curr_frame < self.total_frames-1:
-            self.vf_curr_frame += 1
+        self.vf_curr_frame += 1
         
         # queue the buffer for refilling if we've emptied it
         if self.vf_curr_bufi == self.vf_curr_buf_frames:
@@ -284,7 +283,8 @@ class VidfileReader:
             self.vf_curr_buf = None
             
         # and return which frame was just read (counting dropped frames)
-        return frame_num
+        # plus which frame this is in the file
+        return cam_frame, self.vf_curr_frame-1
         
     def seek(self, frame):
         # do we actually need to seek?
@@ -296,11 +296,12 @@ class VidfileReader:
         
         # can we seek within the current buffer?
         if delta+self.vf_curr_bufi < self.vf_curr_buf_frames and \
-                delta+self.vf_curr_bufi >= 0:
+                delta+self.vf_curr_bufi >= 0 and \
+                self.vf_curr_buf is not None:
             self.vf_curr_bufi += delta
             self.vf_curr_frame += delta
             return
-            
+        
         # ah well, discard what we have
         # get all the buffers waiting to be read
         bufs = []
