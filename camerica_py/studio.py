@@ -68,6 +68,11 @@ try:
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE and mode == "playback":
                     handler.playpause()
+                elif event.key == pygame.K_LEFT and mode == "playback":
+                    if handler.vf.vf_curr_frame > 1:
+                        handler.seek(handler.vf.vf_curr_frame-2)
+                elif event.key == pygame.K_RIGHT and mode == "playback":
+                    handler.seek(handler.vf.vf_curr_frame)
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 pos = pygame.mouse.get_pos()
                 if pos[1] < 512+8:

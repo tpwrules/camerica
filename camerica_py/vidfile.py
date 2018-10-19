@@ -260,7 +260,7 @@ class VidfileReader:
     def next_frame(self, frame, histo):
         if not self.is_open:
             raise ValueError("attempted to read from closed Vidfile")
-        if self.vf_curr_frame == self.total_frames:
+        if self.vf_curr_frame == self.total_frames-1:
             return None
             
         # get a new buffer, if necessary
@@ -275,7 +275,8 @@ class VidfileReader:
         np.copyto(histo, hbuf[self.vf_curr_bufi, :512])
         frame_num = hbuf[self.vf_curr_bufi, 512]
         self.vf_curr_bufi += 1
-        self.vf_curr_frame += 1
+        if self.vf_curr_frame < self.total_frames-1:
+            self.vf_curr_frame += 1
         
         # queue the buffer for refilling if we've emptied it
         if self.vf_curr_bufi == self.vf_curr_buf_frames:
@@ -288,6 +289,8 @@ class VidfileReader:
     def seek(self, frame):
         # do we actually need to seek?
         if frame == self.vf_curr_frame: return
+        if frame < 0 or frame >= self.total_frames:
+            raise ValueError("attempt to seek beyond vidfile bounds")
         
         delta = frame-self.vf_curr_frame
         
