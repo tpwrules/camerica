@@ -35,6 +35,7 @@ histo_surf.set_palette(palette)
 
 mode = sys.argv[1]
 
+handler = None
 if mode == "live":
     handler = vidhandler.VidLiveHandler(320, 256, 60,
         (framebuf_handler, histobuf_handler))
@@ -44,6 +45,9 @@ elif mode == "record":
 elif mode == "playback":
     handler = vidhandler.VidPlaybackHandler(320, 256, 60,
         (framebuf_handler, histobuf_handler), sys.argv[2])
+        
+if handler is None:
+    raise Exception("invalid mode. use 'live', 'record', or 'playback'")
     
 frames = 0
     

@@ -34,19 +34,25 @@ class VidHandler:
     def lock_frame(self):
         if not self.is_running:
             raise ValueError("vid handler stopped")
+        # stop ourselves if the handler thread died
+        if self.h_exception is not None:
+            self.stop() # (stopping will raise the exception)
         self.buf_lock.acquire()
         
     def unlock_frame(self):
         if not self.is_running:
             raise ValueError("vid handler stopped")
         self.buf_lock.release()
+        # stop ourselves if the handler thread died
+        if self.h_exception is not None:
+            self.stop() # (stopping will raise the exception)
         
     def stop(self):
         if not self.is_running:
             return
+        self.is_running = False
         self.h_cmds.put(("terminate",))
         self.handler_thread.join()
-        self.is_running = False
         if self.h_exception is not None:
             raise self.h_exception
             
@@ -58,7 +64,10 @@ class VidHandler:
         
     
     def start_handler(self):
-        self.handler()
+        try:
+            self.handler()
+        except Exception as e:
+            self.h_exception = e
             
     
         

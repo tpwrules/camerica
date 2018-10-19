@@ -61,10 +61,7 @@ class VidfileWriter:
         
         # close the file if the writer died for some reason
         if self.vf_exception is not None:
-            self.close()
-            # close should not return (it will raise the exception)
-            # but just in case
-            return
+            self.close() # (it will raise the exception)
         
         # make sure we have a buffer to write to
         if self.vf_curr_buf is None:
@@ -263,6 +260,10 @@ class VidfileReader:
         if self.vf_curr_frame == self.total_frames:
             raise ValueError("attempt to get frame after vidfile ends")
             
+        # close the file if the reader died for some reason
+        if self.vf_exception is not None:
+            self.close() # (it will raise the exception)
+            
         # get a new buffer, if necessary
         if self.vf_curr_buf is None:
             self.vf_curr_buf_frames, self.vf_curr_buf = \
@@ -291,6 +292,10 @@ class VidfileReader:
         if frame == self.vf_curr_frame: return
         if frame < 0 or frame >= self.total_frames:
             raise ValueError("attempt to seek beyond vidfile bounds")
+            
+        # close the file if the reader died for some reason
+        if self.vf_exception is not None:
+            self.close() # (it will raise the exception)
         
         delta = frame-self.vf_curr_frame
         
@@ -349,7 +354,7 @@ class VidfileReader:
             return
         self.is_open = False
         self.vf_bufs_to_read.put(None) # tell thread to exit
-        self.vf_reader_thread.join()
+        self.vf_reader_thread.join() # and wait until it does
         
         # delete our buffers to free up memory
         if self.vf_curr_file is not None:
@@ -358,8 +363,18 @@ class VidfileReader:
         del self.vf_bufs_to_read
         del self.vf_read_bufs
         
+        # raise any exception the reader thread had
+        if self.vf_exception is not None:
+            e = self.vf_exception
+            del self.vf_exception
+            raise e
+            
+        
     def start_vf_reader(self):
-        self.vf_reader()
+        try:
+            self.vf_reader()
+        except Exception as e:
+            self.vf_exception = e
             
     def vf_reader(self):
         while True:
