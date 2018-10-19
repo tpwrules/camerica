@@ -42,12 +42,12 @@ if mode == "live":
 elif mode == "record":
     handler = vidhandler.VidRecordHandler(320, 256, 60, 
         (framebuf_handler, histobuf_handler), sys.argv[2])
-elif mode == "playback":
+elif mode == "play":
     handler = vidhandler.VidPlaybackHandler(320, 256, 60,
         (framebuf_handler, histobuf_handler), sys.argv[2])
         
 if handler is None:
-    raise Exception("invalid mode. use 'live', 'record', or 'playback'")
+    raise Exception("invalid mode. use 'live', 'record', or 'play'")
     
 frames = 0
     
