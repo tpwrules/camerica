@@ -134,7 +134,7 @@ try:
         # first calculate the maximum value, for display normalization
         hmax = np.max(histobuf)
         # the levels mean the pixel should be on in this row
-        levels = np.linspace(0, hmax, 64, endpoint=False, dtype=np.uint32)
+        levels = np.linspace(hmax, 0, 64, endpoint=False, dtype=np.uint32)
         levels.shape = (64, 1)
         np.copyto(histo_pix, ((histobuf > levels)*255).astype(np.uint8))
         cols = np.arange(512)
