@@ -2,9 +2,6 @@ import sys
 import pygame
 import numpy as np
 
-import stacktracer
-stacktracer.trace_start("trace.html",interval=5,auto=True)
-
 import vidhandler
 
 # launch the display and pygame stuff
