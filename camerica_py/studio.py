@@ -138,7 +138,7 @@ try:
         levels.shape = (64, 1)
         np.copyto(histo_pix, ((histobuf > levels)*255).astype(np.uint8))
         cols = np.arange(512)
-        histo_pix[:, (cols > histo_min_pix) & (cols < histo_max_pix)] ^= 0xFF
+        histo_pix[:, (cols > histo_min_pix) & (cols < histo_max_pix)] |= 0x80
 
         disp.blit(histo_surf, ((640-512)/2, 512+8))
         
