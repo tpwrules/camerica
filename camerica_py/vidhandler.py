@@ -219,11 +219,18 @@ class VidPlaybackHandler(VidHandler):
                     if cmd[0] == "terminate":
                         terminated = True
                     elif cmd[0] == "seek":
-                        print("attempting to seek", cmd[1])
                         self.vf.seek(cmd[1])
-                        print("seeked", cmd[1])
+                        with self.buf_lock:
+                            play_pos = self.vf.next_frame(self.framebuf,
+                                                self.histobuf)
+                            if play_pos is None:
+                                self.playing = False
+                            else:
+                                self.play_pos = play_pos
                     elif cmd[0] == "playpause":
                         self.playing = not self.playing
+                        if self.play_pos is None:
+                            self.playing = False
                     self.h_cmds.task_done()
             except queue.Empty:
                 pass
@@ -234,7 +241,11 @@ class VidPlaybackHandler(VidHandler):
             # and read the latest frame
             if self.playing:
                 with self.buf_lock:
-                    self.play_pos = self.vf.next_frame(self.framebuf,
+                    play_pos = self.vf.next_frame(self.framebuf,
                                         self.histobuf)
+                    if play_pos is None:
+                        self.playing = False
+                    else:
+                        self.play_pos = play_pos
             
             time.sleep(1/self.fps) # wait one frame time (needs to be fixed)

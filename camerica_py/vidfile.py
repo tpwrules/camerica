@@ -200,6 +200,7 @@ class VidfileReader:
         # so we can figure out how many frames the video is
         # (and also validate them)
         self.total_frames = 0
+        self.vf_total_files = 0
         was_last_file = False
         for fnum in range(10000):
             if fnum == 0:
@@ -220,6 +221,7 @@ class VidfileReader:
             seconds_in_file = int((os.path.getsize(name)-HEADER_SIZE)/bytes_per_second)
             if (os.path.getsize(name)-HEADER_SIZE)%bytes_per_second != 0:
                 raise ValueError("vidfile {} is incomplete".format(name))
+            self.vf_total_files += 1
             self.total_frames += (seconds_in_file - 1) * self.fps
             # last second might be incomplete
             f.seek(HEADER_SIZE+(seconds_in_file-1)*bytes_per_second)
@@ -258,6 +260,9 @@ class VidfileReader:
     def next_frame(self, frame, histo):
         if not self.is_open:
             raise ValueError("attempted to read from closed Vidfile")
+        if self.vf_curr_frame == self.total_frames:
+            return None
+            
         # get a new buffer, if necessary
         if self.vf_curr_buf is None:
             self.vf_curr_buf_frames, self.vf_curr_buf = \
@@ -320,7 +325,8 @@ class VidfileReader:
         sec = int(frame/self.fps)
         fnum = int(sec/self.seconds_per_file)
         if fnum != self.vf_curr_file_num:
-            self.vf_curr_file.close()
+            if self.vf_curr_file is not None:
+                self.vf_curr_file.close()
             self.vf_open(fnum)
         self.vf_curr_file.seek(HEADER_SIZE+
             (sec-(fnum*self.seconds_per_file))*bytes_per_second)
@@ -342,7 +348,8 @@ class VidfileReader:
         self.vf_reader_thread.join()
         
         # delete our buffers to free up memory
-        self.vf_curr_file.close()
+        if self.vf_curr_file is not None:
+            self.vf_curr_file.close()
         del self.vf_curr_file
         del self.vf_bufs_to_read
         del self.vf_read_bufs
@@ -356,23 +363,38 @@ class VidfileReader:
             if bufs is None: # asked kindly to exit
                 self.vf_bufs_to_read.task_done()
                 break
+
+            if self.vf_curr_file is None:
+                if self.vf_curr_file_num == self.vf_total_files:
+                    # we are finished reading the vidfile
+                    # so fake read this buffer
+                    self.vf_read_bufs.put((None, bufs))
+                    self.vf_bufs_to_read.task_done()
+                    continue # and wait for something else
+                # open up the next vidfile
+                self.vf_open(self.vf_curr_file_num)
+
             fbuf, hbuf = bufs
             
             nbufbytes = self.vf_curr_file.read(4)
-            if len(nbufbytes) == 0: # must have hit EOF
+            if len(nbufbytes) == 0:
+                # hit the end of this file
+                self.vf_curr_file.close()
+                self.vf_curr_file = None
                 self.vf_curr_file_num += 1
-                if self.vf_curr_file is not None:
-                    self.vf_curr_file.close()
-                self.vf_open(self.vf_curr_file_num)
-                nbufbytes = self.vf_curr_file.read(4)
-            
+                # we can't actually finish this buffer
+                # until the next loop, so put it back in the queue
+                self.vf_bufs_to_read.put(bufs)
+                self.vf_bufs_to_read.task_done()
+                continue
+                
             nbuf, = struct.unpack("<I", nbufbytes)
             self.vf_curr_file.readinto(fbuf.data)
             self.vf_curr_file.readinto(hbuf.data)
             
-            self.vf_read_bufs.put((nbuf, (fbuf, hbuf)))
+            self.vf_read_bufs.put((nbuf, bufs))
             self.vf_bufs_to_read.task_done()
-            
+                        
     def vf_open(self, num):
         if num == 0:
             name = self.path
