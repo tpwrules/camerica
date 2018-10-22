@@ -4,6 +4,9 @@ import numpy as np
 
 import vidhandler
 
+from neondraw.neondraw import lib
+nd_conv_merlin = lib.nd_conv_merlin
+
 # launch the display and pygame stuff
 disp = pygame.display.set_mode((320*2, 256*2+72))
 clock = pygame.time.Clock()
@@ -13,18 +16,17 @@ clock = pygame.time.Clock()
 framebuf_handler = np.empty((256, 320), dtype=np.uint16)
 histobuf_handler = np.empty((1, 512), dtype=np.uint32)
 # and then ones for the frame we are working on displaying
-framebuf = np.empty((256, 320), dtype=np.int32)
+framebuf = np.empty((256, 320), dtype=np.uint16)
 histobuf = np.empty((1, 512), dtype=np.uint32)
 
-frame_pix = np.empty((256*2, 320*2), dtype=np.uint8)
+frame_pix = np.empty((256*2, 320*2), dtype=np.uint32)
 
 histo_levels = np.empty((1, 64), dtype=np.uint32)
 histo_pix = np.empty((64, 512), dtype=np.uint8)
 
 # make a surface with the current frame as its backing
 palette = [(c, c, c) for c in range(256)]
-frame_surf = pygame.image.frombuffer(frame_pix, (320*2, 256*2), "P")
-frame_surf.set_palette(palette)
+frame_surf = pygame.image.frombuffer(frame_pix, (320*2, 256*2), "RGBX")
 
 # and one for the histogram too
 histo_surf = pygame.image.frombuffer(histo_pix, (512, 64), "P")
@@ -67,18 +69,18 @@ try:
             if event.type == pygame.QUIT:
                 break
             elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_SPACE and mode == "playback":
+                if event.key == pygame.K_SPACE and mode == "play":
                     handler.playpause()
-                elif event.key == pygame.K_LEFT and mode == "playback":
+                elif event.key == pygame.K_LEFT and mode == "play":
                     if handler.curr_frame > 0:
                         handler.seek(handler.curr_frame-1)
-                elif event.key == pygame.K_RIGHT and mode == "playback":
+                elif event.key == pygame.K_RIGHT and mode == "play":
                     if handler.curr_frame < handler.total_frames-1:
                         handler.seek(handler.curr_frame+1)
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 pos = pygame.mouse.get_pos()
                 if pos[1] < 512+8:
-                    if mode != "playback":
+                    if mode != "play":
                         continue
                     # handle seek request
                     target = pos[0]*handler.vf.total_frames//640
@@ -118,14 +120,10 @@ try:
         np.copyto(framebuf, framebuf_handler)
         np.copyto(histobuf, histobuf_handler)
         handler.unlock_frame()  
-        # perform user requested value scaling
-        framebuf -= int(histo_min_pix*128)
-        framebuf *= int((512*128)/(histo_max_pix-histo_min_pix))
-        framebuf >>= 15
-        np.clip(framebuf, 0, 255, out=framebuf)
-        scale(frame_pix, framebuf, 2)
-        # and finally blit it to the screen
-        disp.blit(frame_surf, (0, 0))
+        nd_conv_merlin(framebuf.ctypes.data, disp._pixels_address,
+            int(histo_min_pix*128), 
+            int((512*128)/(histo_max_pix-histo_min_pix)))
+        #disp.blit(frame_surf, (0, 0))
         
         # now handle the histogram
         # first calculate the maximum value, for display normalization
