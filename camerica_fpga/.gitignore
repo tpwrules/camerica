@@ -17,5 +17,9 @@ u-boot.scr
 camerica_fpga.qws
 greybox_tmp/
 *.bak
+camerica_fpga_nativelink_simulation.rpt
+qmegawiz_errors_log.txt
+simulation/
+*.vcd
 
 workspace/
