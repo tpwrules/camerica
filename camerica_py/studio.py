@@ -3,34 +3,23 @@ import pygame
 import numpy as np
 
 import vidhandler
-
-from neondraw.neondraw import lib
-nd_conv_merlin = lib.nd_conv_merlin
+from draw import get_drawer
 
 # launch the display and pygame stuff
 disp = pygame.display.set_mode((320*2, 256*2+72))
 clock = pygame.time.Clock()
 
+# construct the class to draw the image on screen
+drawer = get_drawer("merlin")(disp)
+
 # construct buffers for the current displayed frame, to be written
 # by the handler
 framebuf_handler = np.empty((256, 320), dtype=np.uint16)
 histobuf_handler = np.empty((1, 512), dtype=np.uint32)
-# and then ones for the frame we are working on displaying
-framebuf = np.empty((256, 320), dtype=np.uint16)
-histobuf = np.empty((1, 512), dtype=np.uint32)
 
-frame_pix = np.empty((256*2, 320*2), dtype=np.uint32)
-
-histo_levels = np.empty((1, 64), dtype=np.uint32)
-histo_pix = np.empty((64, 512), dtype=np.uint8)
-
-# make a surface with the current frame as its backing
-palette = [(c, c, c) for c in range(256)]
-frame_surf = pygame.image.frombuffer(frame_pix, (320*2, 256*2), "RGBX")
-
-# and one for the histogram too
-histo_surf = pygame.image.frombuffer(histo_pix, (512, 64), "P")
-histo_surf.set_palette(palette)
+# save the buffers made by the drawer so we can copy into them
+framebuf = drawer.framebuf
+histobuf = drawer.histobuf
 
 mode = sys.argv[1]
 
@@ -49,14 +38,6 @@ if handler is None:
     raise Exception("invalid mode. use 'live', 'record', or 'play'")
     
 frames = 0
-    
-# stolen from stackoverflow https://stackoverflow.com/questions/7525214/how-to-scale-a-numpy-array
-def scale(A, B, k):     # fill A with B scaled by k
-    Y = A.shape[0]
-    X = A.shape[1]
-    for y in range(0, k):
-        for x in range(0, k):
-            A[y:Y:k, x:X:k] = B
             
 histo_min_pix = 0
 histo_max_pix = 512
@@ -119,23 +100,10 @@ try:
         handler.lock_frame()
         np.copyto(framebuf, framebuf_handler)
         np.copyto(histobuf, histobuf_handler)
-        handler.unlock_frame()  
-        nd_conv_merlin(framebuf.ctypes.data, disp._pixels_address,
-            int(histo_min_pix*128), 
-            int((512*128)/(histo_max_pix-histo_min_pix)))
-        #disp.blit(frame_surf, (0, 0))
+        handler.unlock_frame()
         
-        # now handle the histogram
-        # first calculate the maximum value, for display normalization
-        hmax = np.max(histobuf)
-        # the levels mean the pixel should be on in this row
-        levels = np.linspace(hmax, 0, 64, endpoint=False, dtype=np.uint32)
-        levels.shape = (64, 1)
-        np.copyto(histo_pix, ((histobuf > levels)*255).astype(np.uint8))
-        cols = np.arange(512)
-        histo_pix[:, (cols >= histo_min_pix) & (cols < histo_max_pix)] |= 0x80
-
-        disp.blit(histo_surf, ((640-512)/2, 512+8))
+        # and use the drawer to make it show on the screen
+        drawer.draw(histo_min_pix, histo_max_pix)
         
         frames += 1
         if frames % 30 == 0:
