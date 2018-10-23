@@ -1,6 +1,7 @@
 # handle drawing to the display
 import pygame
 import numpy as np
+import time
 
 def get_drawer(camera):
     if camera == "merlin":
@@ -9,9 +10,11 @@ def get_drawer(camera):
         raise ValueError("unrecognized camera '{}'".format(camera)) 
 
 class Drawer:
-    def __init__(self, camera, disp, profile=False):
+    def __init__(self, camera, disp):
         self.disp = disp
-        self.profile = profile
+        
+        self.perftime = 0
+        self.perftimes = 0
         
         self.camera = camera
         if camera == "merlin":
@@ -42,8 +45,18 @@ class Drawer:
         # (frame draw will shift pixles right by 8 bits to get high 16
         #  + 7 bits to counter scale multiplication)
         scale = int((512*128)/(histo_max-histo_min))
+        now = time.perf_counter()
         self.draw_frame(offset, scale)
+        end = time.perf_counter()
+        self.perftime += (end-now)
+        self.perftimes += 1
         self.draw_histo(histo_min, histo_max)
+        
+    def stats(self):
+        s = "{} us".format(self.perftime*1000000/self.perftimes)
+        self.perftime = 0
+        self.perftimes = 0
+        return s
         
     def draw_histo(self, histo_min, histo_max):
         # first calculate the maximum value, for display normalization
@@ -58,8 +71,8 @@ class Drawer:
         self.disp.blit(self.histo_surf, ((640-512)/2, 512+8))
         
 class MerlinDrawer(Drawer):
-    def __init__(self, disp, profile=False):
-        super().__init__("merlin", disp, profile)
+    def __init__(self, disp):
+        super().__init__("merlin", disp)
         
         # allocate frame buffer with 32 bit pixels so we have
         # room to scale

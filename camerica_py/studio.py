@@ -107,7 +107,7 @@ try:
         
         frames += 1
         if frames % 30 == 0:
-            print(clock.get_fps(), handler.dropped_frames)
+            print(clock.get_fps(), handler.dropped_frames, drawer.stats())
         
         pygame.display.update()
         clock.tick(30)
