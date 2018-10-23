@@ -3,9 +3,20 @@ import pygame
 import numpy as np
 import time
 
+neon_available = False
+try:
+    from neondraw.neondraw import lib, ffi
+    if lib.nd_testadd1(4) == 5:
+        neon_available = True
+except:
+    pass
+
 def get_drawer(camera):
     if camera == "merlin":
-        return MerlinDrawer
+        if neon_available:
+            return NEONMerlinDrawer
+        else:
+            return MerlinDrawer
     else:
         raise ValueError("unrecognized camera '{}'".format(camera)) 
 
@@ -54,8 +65,8 @@ class Drawer:
         
     def stats(self):
         s = "{} us".format(self.perftime*1000000/self.perftimes)
-        self.perftime = 0
-        self.perftimes = 0
+        #self.perftime = 0
+        #self.perftimes = 0
         return s
         
     def draw_histo(self, histo_min, histo_max):
@@ -110,4 +121,21 @@ class MerlinDrawer(Drawer):
         # and blit it to the screen
         self.disp.blit(self.frame_surf, (0, 0))
         
+class NEONMerlinDrawer(Drawer):
+    def __init__(self, disp):
+        super().__init__("merlin", disp)
         
+        # allocate a frame buffer the same size as the camera data
+        # the NEON routine handles all the transformations
+        self.framebuf = np.empty((256, 320), dtype=np.uint16)
+        
+    def draw_frame(self, offset, scale):
+        # call the NEON routine and let it do the magic
+        # we write directly into the display surface, so lock it first
+        self.disp.lock()
+        lib.nd_conv_merlin(self.framebuf.ctypes.data, # source ptr
+            self.disp._pixels_address, # dest ptr
+            offset,
+            scale)
+        self.disp.unlock()
+            
