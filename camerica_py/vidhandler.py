@@ -228,7 +228,7 @@ class VidPlaybackHandler(VidHandler):
     
     def handler(self):
         terminated = False
-        do_next_frame = False
+        do_next_frame = True
         while not terminated:
             # process any commands
             try:
