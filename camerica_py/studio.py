@@ -82,24 +82,18 @@ try:
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 pos = pygame.mouse.get_pos()
                 for widget in widget_list:
-                    if widget.is_hit(pos):
-                        widget.mouseclick(True,
-                            (pos[0]-widget.rect.left, pos[1]-widget.rect.top))
-                        break
+                    widget.mouseclick(True,
+                        (pos[0]-widget.rect.left, pos[1]-widget.rect.top))
             elif event.type == pygame.MOUSEBUTTONUP:
                 pos = pygame.mouse.get_pos()
                 for widget in widget_list:
-                    if widget.is_hit(pos):
-                        widget.mouseclick(False,
-                            (pos[0]-widget.rect.left, pos[1]-widget.rect.top))
-                        break
+                    widget.mouseclick(False,
+                        (pos[0]-widget.rect.left, pos[1]-widget.rect.top))
             elif event.type == pygame.MOUSEMOTION:
                 pos = pygame.mouse.get_pos()
                 for widget in widget_list:
-                    if widget.is_hit(pos):
-                        widget.mousemove(
-                            (pos[0]-widget.rect.left, pos[1]-widget.rect.top))
-                        break
+                    widget.mousemove(
+                        (pos[0]-widget.rect.left, pos[1]-widget.rect.top))
         if event.type == pygame.QUIT:
             break
             
