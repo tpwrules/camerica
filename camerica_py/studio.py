@@ -6,7 +6,7 @@ import vidhandler
 from draw import get_drawer
 
 # launch the display and pygame stuff
-disp = pygame.display.set_mode((320*2, 256*2+72))
+disp = pygame.display.set_mode((320*2+136, 256*2+72))
 clock = pygame.time.Clock()
 
 # construct the class to draw the image on screen

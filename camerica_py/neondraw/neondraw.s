@@ -29,9 +29,10 @@ nd_conv_merlin:
     // number of rows
     ldr r2, =256
     // number of bytes per row
-    ldr r12, =(640*4)
+    ldr r12, =(640*4)+(136*4)
     // pointer to second row of output
     add r3, r1, r12
+    ldr r12, =(640*4)
 merlin_loop:
 merlin_row:
     // load 8 pixels from source to q0
@@ -75,10 +76,11 @@ merlin_row:
     subs r12, r12, #64
     bne merlin_row
     
-    ldr r12, =(640*4)
+    ldr r12, =(640*4)+2*(136*4)
     // move both pointers to next row
     add r1, r1, r12
     add r3, r3, r12
+    ldr r12, =(640*4)
     
     // now prepare for next iteration
     subs r2, r2, #1
