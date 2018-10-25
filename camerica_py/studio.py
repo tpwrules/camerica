@@ -9,6 +9,10 @@ from draw import get_drawer
 disp = pygame.display.set_mode((320*2+136, 256*2+72))
 clock = pygame.time.Clock()
 
+# load up whatever font pygame gives us to draw status
+pygame.font.init()
+font = pygame.font.SysFont("", 24)
+
 # construct the class to draw the image on screen
 drawer = get_drawer("merlin")(disp)
 
@@ -42,6 +46,21 @@ frames = 0
 histo_min_pix = 0
 histo_max_pix = 512
 histo_center = 256
+
+# build list of status texts
+# evens are left justified, odds are right-justified
+# one row gap between them
+
+statuses = [
+    "Display FPS",
+    "",
+    "Current frame", # frames
+    "",
+    "Dropped frames", # frames
+    "",
+    "Saved frames", # frames
+    "",
+]
 
 try:
     while True:
@@ -105,9 +124,31 @@ try:
         # and use the drawer to make it show on the screen
         drawer.draw(histo_min_pix, histo_max_pix)
         
+        # determine new status texts
+        # current number of frames
+        statuses[3] = str(3)
+        # number of frames dropped so far
+        statuses[5] = str(handler.dropped_frames)
+        # total frames recorded/available to play
+        statuses[7] = str(handler.total_frames)
+        
+        # erase the status area
+        disp.fill((0, 0, 0), (640+8, 0, 128, 512))
+        
+        # draw the status items
+        status_y = 20
+        for name, value in zip(statuses[::2], statuses[1::2]):
+            pixels = font.render(name, True, (255, 255, 255), (0, 0, 0))
+            disp.blit(pixels, (640+8, status_y))
+            status_y += 26
+            
+            pixels = font.render(value, True, (255, 255, 255), (0, 0, 0))
+            disp.blit(pixels, (640+136-pixels.get_width(), status_y))
+            status_y += 26+13
+        
         frames += 1
         if frames % 30 == 0:
-            print(clock.get_fps(), handler.dropped_frames, drawer.stats())
+            statuses[1] = str(int(clock.get_fps()+.5))
         
         pygame.display.update()
         clock.tick(30)
