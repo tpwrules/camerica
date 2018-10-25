@@ -4,6 +4,7 @@ import numpy as np
 
 import vidhandler
 from draw import get_drawer
+import widgets
 
 # launch the display and pygame stuff
 disp = pygame.display.set_mode((320*2+136, 256*2+72))
@@ -42,10 +43,9 @@ if handler is None:
     raise Exception("invalid mode. use 'live', 'record', or 'play'")
     
 frames = 0
-            
-histo_min_pix = 0
-histo_max_pix = 512
-histo_center = 256
+           
+histo_widget = widgets.HistoWidget(disp, ((640-512)/2, 512+8))
+widget_list = [histo_widget]
 
 # build list of status texts
 # evens are left justified, odds are right-justified
@@ -81,38 +81,25 @@ try:
                         handler.seek(handler.vid_frame+1)
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 pos = pygame.mouse.get_pos()
-                if pos[1] < 512+8:
-                    if mode != "play":
-                        continue
-                    # handle seek request
-                    target = pos[0]*handler.saved_frames//640
-                    handler.seek(target)
-                    continue
-                xpos = pos[0]
-                if xpos < (640-512)/2:
-                    xpos = (640-512)/2
-                elif xpos > (640-512)/2+512:
-                    xpos = (640-512)/2+512
-                xpos -= (640-512)/2
-                if event.button == 3: # right click
-                    diff = histo_max_pix - histo_center
-                    histo_min_pix = xpos - diff
-                    histo_max_pix = xpos + diff
-                    histo_center = xpos
-                    if histo_min_pix < 0:
-                        histo_min_pix = 0
-                    if histo_max_pix > 512:
-                        histo_max_pix = 512
-                    if histo_min_pix == histo_max_pix:
-                        histo_max_pix += 1
-                elif event.button == 1: # left click
-                    if xpos < histo_center:
-                        histo_min_pix = xpos
-                    elif xpos > histo_center:
-                        histo_max_pix = xpos
-                    histo_center = (histo_max_pix+histo_min_pix)//2
-                    if histo_min_pix == histo_max_pix:
-                        histo_max_pix += 1
+                for widget in widget_list:
+                    if widget.is_hit(pos):
+                        widget.mouseclick(True,
+                            (pos[0]-widget.rect.left, pos[1]-widget.rect.top))
+                        break
+            elif event.type == pygame.MOUSEBUTTONUP:
+                pos = pygame.mouse.get_pos()
+                for widget in widget_list:
+                    if widget.is_hit(pos):
+                        widget.mouseclick(False,
+                            (pos[0]-widget.rect.left, pos[1]-widget.rect.top))
+                        break
+            elif event.type == pygame.MOUSEMOTION:
+                pos = pygame.mouse.get_pos()
+                for widget in widget_list:
+                    if widget.is_hit(pos):
+                        widget.mousemove(
+                            (pos[0]-widget.rect.left, pos[1]-widget.rect.top))
+                        break
         if event.type == pygame.QUIT:
             break
             
@@ -124,7 +111,7 @@ try:
         handler.unlock_frame()
         
         # and use the drawer to make it show on the screen
-        drawer.draw(histo_min_pix, histo_max_pix)
+        drawer.draw(histo_widget.min_bin, histo_widget.max_bin)
         
         # determine new status texts
         # disk buffer fullness
