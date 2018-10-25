@@ -54,6 +54,8 @@ histo_center = 256
 statuses = [
     "Display FPS",
     "",
+    "Disk buffer", # percent
+    "(unused)",
     "Current frame", # frames
     "",
     "Dropped frames", # frames
@@ -125,12 +127,19 @@ try:
         drawer.draw(histo_min_pix, histo_max_pix)
         
         # determine new status texts
+        # disk buffer fullness
+        if mode == "record":
+            entries = 10-handler.vf.vf_written_bufs.qsize()
+            statuses[3] = "{}%".format(int(entries*100/10))
+        elif mode == "play":
+            entries = 10-handler.vf.vf_bufs_to_read.qsize()
+            statuses[3] = "{}%".format(int(entries*100/10))
         # current number of frames
-        statuses[3] = str(handler.current_frame+1)
+        statuses[5] = str(handler.current_frame+1)
         # number of frames dropped so far
-        statuses[5] = str(handler.dropped_frames)
+        statuses[7] = str(handler.dropped_frames)
         # total frames recorded/available to play
-        statuses[7] = str(handler.saved_frames)
+        statuses[9] = str(handler.saved_frames)
         
         # erase the status area
         disp.fill((0, 0, 0), (640+8, 0, 128, 512))
