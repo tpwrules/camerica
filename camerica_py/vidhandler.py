@@ -88,8 +88,9 @@ class VidLiveHandler(VidHandler):
         self.fq = hw.Framequeue(self.udmabuf, self.hw_regs)
         
         # save also the current frame progress
-        self.total_frames = 0
+        self.current_frame = 0
         self.dropped_frames = 0
+        self.saved_frames = 0
         
         # now start up the handler thread
         self.handler_thread.start()
@@ -120,7 +121,8 @@ class VidLiveHandler(VidHandler):
             if len(frame_data) > 0:
                 with self.buf_lock:
                     self.dropped_frames += just_dropped
-                    self.total_frames += len(frame_data)
+                    self.saved_frames += len(frame_data)
+                    self.current_frame += (just_dropped+len(frame_data))
                     np.copyto(self.framebuf, frame_data[-1][0])
                     np.copyto(self.histobuf, frame_data[-1][1])
             
@@ -143,8 +145,9 @@ class VidRecordHandler(VidHandler):
         self.fq = hw.Framequeue(self.udmabuf, self.hw_regs)
         
         # save also the current frame progress
-        self.total_frames = 0
+        self.current_frame = 0
         self.dropped_frames = 0
+        self.saved_frames = 0
         
         # and create a vidfile to save the recording in
         self.vf = vidfile.VidfileWriter(fname, width, height, fps)
@@ -179,10 +182,12 @@ class VidRecordHandler(VidHandler):
             # and any frames from hardware
             frame_data, just_dropped = self.fq.get_new_frames()
             self.dropped_frames += just_dropped
+            self.current_frame += just_dropped
             if len(frame_data) > 0:
                 for frame, histo in frame_data:
-                    self.vf.write(self.total_frames, frame, histo)
-                    self.total_frames += 1
+                    self.vf.write(self.current_frame, frame, histo)
+                    self.current_frame += 1
+                    self.saved_frames += 1
                 with self.buf_lock:
                     np.copyto(self.framebuf, frame_data[-1][0])
                     np.copyto(self.histobuf, frame_data[-1][1])
@@ -194,15 +199,15 @@ class VidPlaybackHandler(VidHandler):
     def __init__(self, width, height, fps, bufs, fname):
         super().__init__(width, height, fps, bufs)
         
-        self.play_pos = 0
-        self.dropped_frames = 0
         self.playing = False
         
         # create the vidfile that the recording comes from
         self.vf = vidfile.VidfileReader(fname)
-        self.total_frames = self.vf.total_frames
-        self.curr_frame = 0
-        self.cam_frame = 0
+        
+        self.vid_frame = 0
+        self.current_frame = 0
+        self.dropped_frames = 0
+        self.saved_frames = self.vf.saved_frames
         
         # now start up the handler thread
         self.handler_thread.start()
@@ -236,7 +241,7 @@ class VidPlaybackHandler(VidHandler):
                         do_next_frame = True
                     elif cmd[0] == "playpause":
                         self.playing = not self.playing
-                        if self.curr_frame == self.total_frames-1:
+                        if self.vid_frame == self.saved_frames-1:
                             self.playing = False
                     self.h_cmds.task_done()
             except queue.Empty:
@@ -249,9 +254,10 @@ class VidPlaybackHandler(VidHandler):
             if self.playing or do_next_frame:
                 do_next_frame = False
                 with self.buf_lock:
-                    self.cam_frame, self.curr_frame = self.vf.next_frame(
+                    self.current_frame, self.vid_frame = self.vf.next_frame(
                         self.framebuf, self.histobuf)
-                if self.curr_frame == self.total_frames-1:
+                    self.dropped_frames = self.current_frame-self.vid_frame
+                if self.vid_frame == self.saved_frames-1:
                     self.playing = False
             
             time.sleep(1/self.fps) # wait one frame time (needs to be fixed)

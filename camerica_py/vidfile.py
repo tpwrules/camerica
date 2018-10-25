@@ -196,7 +196,7 @@ class VidfileReader:
         # now find all the other vidfiles and open them
         # so we can figure out how many frames the video is
         # (and also validate them)
-        self.total_frames = 0
+        self.saved_frames = 0
         self.vf_total_files = 0
         was_last_file = False
         for fnum in range(10000):
@@ -219,11 +219,11 @@ class VidfileReader:
             if (os.path.getsize(name)-HEADER_SIZE)%bytes_per_second != 0:
                 raise ValueError("vidfile {} is incomplete".format(name))
             self.vf_total_files += 1
-            self.total_frames += (seconds_in_file - 1) * self.fps
+            self.saved_frames += (seconds_in_file - 1) * self.fps
             # last second might be incomplete
             f.seek(HEADER_SIZE+(seconds_in_file-1)*bytes_per_second)
             frames_in_second, = struct.unpack("<I", f.read(4))
-            self.total_frames += frames_in_second
+            self.saved_frames += frames_in_second
             if frames_in_second != self.fps:
                 was_last_file = True # it has to be now
             f.close()
@@ -257,7 +257,7 @@ class VidfileReader:
     def next_frame(self, frame, histo):
         if not self.is_open:
             raise ValueError("attempted to read from closed Vidfile")
-        if self.vf_curr_frame == self.total_frames:
+        if self.vf_curr_frame == self.saved_frames:
             raise ValueError("attempt to get frame after vidfile ends")
             
         # close the file if the reader died for some reason
@@ -290,7 +290,7 @@ class VidfileReader:
     def seek(self, frame):
         # do we actually need to seek?
         if frame == self.vf_curr_frame: return
-        if frame < 0 or frame >= self.total_frames:
+        if frame < 0 or frame >= self.saved_frames:
             raise ValueError("attempt to seek beyond vidfile bounds")
             
         # close the file if the reader died for some reason

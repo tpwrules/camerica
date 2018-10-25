@@ -72,18 +72,18 @@ try:
                 if event.key == pygame.K_SPACE and mode == "play":
                     handler.playpause()
                 elif event.key == pygame.K_LEFT and mode == "play":
-                    if handler.curr_frame > 0:
-                        handler.seek(handler.curr_frame-1)
+                    if handler.vid_frame > 0:
+                        handler.seek(handler.vid_frame-1)
                 elif event.key == pygame.K_RIGHT and mode == "play":
-                    if handler.curr_frame < handler.total_frames-1:
-                        handler.seek(handler.curr_frame+1)
+                    if handler.vid_frame < handler.saved_frames-1:
+                        handler.seek(handler.vid_frame+1)
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 pos = pygame.mouse.get_pos()
                 if pos[1] < 512+8:
                     if mode != "play":
                         continue
                     # handle seek request
-                    target = pos[0]*handler.vf.total_frames//640
+                    target = pos[0]*handler.saved_frames//640
                     handler.seek(target)
                     continue
                 xpos = pos[0]
@@ -126,11 +126,11 @@ try:
         
         # determine new status texts
         # current number of frames
-        statuses[3] = str(3)
+        statuses[3] = str(handler.current_frame+1)
         # number of frames dropped so far
         statuses[5] = str(handler.dropped_frames)
         # total frames recorded/available to play
-        statuses[7] = str(handler.total_frames)
+        statuses[7] = str(handler.saved_frames)
         
         # erase the status area
         disp.fill((0, 0, 0), (640+8, 0, 128, 512))
