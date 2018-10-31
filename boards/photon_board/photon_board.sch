@@ -1,4 +1,136 @@
-EESchema Schematic File Version 2
-EELAYER 25 0
+EESchema Schematic File Version 4
+EELAYER 26 0
 EELAYER END
+$Descr A4 11693 8268
+encoding utf-8
+Sheet 1 1
+Title ""
+Date ""
+Rev ""
+Comp ""
+Comment1 ""
+Comment2 ""
+Comment3 ""
+Comment4 ""
+$EndDescr
+$Comp
+L Connector_Generic:Conn_02x20_Odd_Even J?
+U 1 1 5BD9CB75
+P 1750 2050
+F 0 "J?" H 1800 3167 50  0000 C CNN
+F 1 "TERASIC" H 1800 3076 50  0000 C CNN
+F 2 "Connector_PinSocket_2.54mm:PinSocket_2x20_P2.54mm_Vertical" H 1750 2050 50  0001 C CNN
+F 3 "https://www.digikey.com/product-detail/en/sullins-connector-solutions/SFH11-PBPC-D20-ST-BK/S9200-ND/1990093" H 1750 2050 50  0001 C CNN
+	1    1750 2050
+	1    0    0    -1  
+$EndComp
+NoConn ~ 1550 1150
+NoConn ~ 1550 1250
+$Comp
+L power:+5V #PWR?
+U 1 1 5BD9CC1E
+P 1300 1650
+F 0 "#PWR?" H 1300 1500 50  0001 C CNN
+F 1 "+5V" H 1315 1823 50  0000 C CNN
+F 2 "" H 1300 1650 50  0001 C CNN
+F 3 "" H 1300 1650 50  0001 C CNN
+	1    1300 1650
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	1300 1650 1550 1650
+$Comp
+L power:+3V3 #PWR?
+U 1 1 5BD9CCF3
+P 1300 2550
+F 0 "#PWR?" H 1300 2400 50  0001 C CNN
+F 1 "+3V3" H 1315 2723 50  0000 C CNN
+F 2 "" H 1300 2550 50  0001 C CNN
+F 3 "" H 1300 2550 50  0001 C CNN
+	1    1300 2550
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	1300 2550 1550 2550
+$Comp
+L power:GND #PWR?
+U 1 1 5BD9CD64
+P 2300 1650
+F 0 "#PWR?" H 2300 1400 50  0001 C CNN
+F 1 "GND" H 2305 1477 50  0000 C CNN
+F 2 "" H 2300 1650 50  0001 C CNN
+F 3 "" H 2300 1650 50  0001 C CNN
+	1    2300 1650
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	2300 1650 2050 1650
+$Comp
+L power:GND #PWR?
+U 1 1 5BD9CDEB
+P 2300 2550
+F 0 "#PWR?" H 2300 2300 50  0001 C CNN
+F 1 "GND" H 2305 2377 50  0000 C CNN
+F 2 "" H 2300 2550 50  0001 C CNN
+F 3 "" H 2300 2550 50  0001 C CNN
+	1    2300 2550
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	2300 2550 2050 2550
+$Comp
+L Connector:DB15_Female_HighDensity_MountingHoles J?
+U 1 1 5BD9D048
+P 8100 1900
+F 0 "J?" H 8100 2767 50  0000 C CNN
+F 1 "PHOTON" H 8100 2676 50  0000 C CNN
+F 2 "" H 7150 2300 50  0001 C CNN
+F 3 " ~" H 7150 2300 50  0001 C CNN
+	1    8100 1900
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:GND #PWR?
+U 1 1 5BD9D12F
+P 8100 2600
+F 0 "#PWR?" H 8100 2350 50  0001 C CNN
+F 1 "GND" H 8105 2427 50  0000 C CNN
+F 2 "" H 8100 2600 50  0001 C CNN
+F 3 "" H 8100 2600 50  0001 C CNN
+	1    8100 2600
+	1    0    0    -1  
+$EndComp
+Text Label 7800 1500 2    50   ~ 0
+DATA_SYNC+
+Text Label 7800 1700 2    50   ~ 0
+DATA1_OUT+
+Text Label 7800 1900 2    50   ~ 0
+DATA2_OUT+
+Text Label 7800 2100 2    50   ~ 0
+DATA_CLK+
+Text Label 7800 1400 2    50   ~ 0
+DATA_SYNC-
+Text Label 7800 1600 2    50   ~ 0
+DATA1_OUT-
+Text Label 7800 1800 2    50   ~ 0
+DATA2_OUT-
+Text Label 7800 2000 2    50   ~ 0
+DATA_CLK-
+$Comp
+L power:GND #PWR?
+U 1 1 5BD9D377
+P 7450 2200
+F 0 "#PWR?" H 7450 1950 50  0001 C CNN
+F 1 "GND" H 7455 2027 50  0000 C CNN
+F 2 "" H 7450 2200 50  0001 C CNN
+F 3 "" H 7450 2200 50  0001 C CNN
+	1    7450 2200
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	7450 2200 7800 2200
+NoConn ~ 7800 2300
+NoConn ~ 8400 1900
+NoConn ~ 8400 2100
+NoConn ~ 8400 2300
 $EndSCHEMATC
