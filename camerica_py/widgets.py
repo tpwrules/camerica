@@ -93,4 +93,39 @@ class HistoWidget(Widget):
             self.drag_min_bin = self.min_bin
             self.drag_max_bin = self.max_bin
 
+class SeekbarWidget(Widget):
+    def __init__(self, disp, pos):
+        super().__init__(disp, pos, (776, 40))
+        self.pos_rel = pygame.Rect(0, 0, 776, 40)
         
+        self.new_position = False
+        
+        # the seekbar is from (10, 15) to (766, 45)
+        # the seek handle is 20x60
+        
+        self.seekbar_rect = pygame.Rect(5, 15, 766, 10).move(pos)
+        self.seekhandle_rect = pygame.Rect(0, 0, 10, 40).move(pos)
+        
+        self.position = 0 # from 0 to 1
+        
+        self.handle_pos = 0 # top left corner, max 766
+        
+        self.mouse_clicked = False
+            
+    def mouseclick(self, down, pos):
+        self.mouse_clicked = down
+        self.mousemove(pos)
+        
+    def mousemove(self, pos):
+        if self.mouse_clicked and self.pos_rel.collidepoint(pos):
+            new_pos = max(min(pos[0]-5, 766), 0)/766
+            if new_pos != self.position:
+                self.new_position = True
+                self.position = max(min(pos[0]-5, 766), 0)/766
+        
+    def draw(self, pos):
+        self.handle_pos = int(pos*766)
+        pygame.draw.rect(self.disp, (0, 0, 0), self.rect)
+        pygame.draw.rect(self.disp, (200, 200, 200), self.seekbar_rect)
+        pygame.draw.rect(self.disp, (100, 100, 100),
+            self.seekhandle_rect.move(self.handle_pos, 0))

@@ -129,7 +129,6 @@ class VidLiveHandler(VidHandler):
             time.sleep(0.03) # avoid banging hardware
                 
 
-# live display of the video, without any recording or playback
 class VidRecordHandler(VidHandler):
     def __init__(self, width, height, fps, bufs, fname):
         # check that the hardware exists

@@ -7,7 +7,7 @@ from draw import get_drawer
 import widgets
 
 # launch the display and pygame stuff
-disp = pygame.display.set_mode((320*2+136, 256*2+72))
+disp = pygame.display.set_mode((320*2+136, 256*2+72+48))
 clock = pygame.time.Clock()
 
 # load up whatever font pygame gives us to draw status
@@ -45,7 +45,8 @@ if handler is None:
 frames = 0
            
 histo_widget = widgets.HistoWidget(disp, ((640-512)/2, 512+8))
-widget_list = [histo_widget]
+seekbar_widget = widgets.SeekbarWidget(disp, (0, 512+72+8))
+widget_list = [histo_widget, seekbar_widget]
 
 # build list of status texts
 # evens are left justified, odds are right-justified
@@ -106,6 +107,16 @@ try:
         
         # and use the drawer to make it show on the screen
         drawer.draw(histo_widget.min_bin, histo_widget.max_bin)
+        
+        if seekbar_widget.new_position and mode == "play":
+            seekbar_widget.new_position = False
+            handler.seek(
+                int(seekbar_widget.position*handler.saved_frames))
+                
+        if mode == "play" and handler.saved_frames > 0:
+            seekbar_widget.draw(handler.vid_frame/handler.saved_frames)
+        else:
+            seekbar_widget.draw(1)
         
         # determine new status texts
         # disk buffer fullness
