@@ -1,0 +1,327 @@
+EESchema Schematic File Version 4
+LIBS:photon_board-cache
+EELAYER 26 0
+EELAYER END
+$Descr A4 11693 8268
+encoding utf-8
+Sheet 1 1
+Title ""
+Date ""
+Rev ""
+Comp ""
+Comment1 ""
+Comment2 ""
+Comment3 ""
+Comment4 ""
+$EndDescr
+$Comp
+L Connector_Generic:Conn_02x20_Odd_Even J1
+U 1 1 5BD9CB75
+P 1750 2050
+F 0 "J1" H 1800 3167 50  0000 C CNN
+F 1 "TERASIC" H 1800 3076 50  0000 C CNN
+F 2 "Connector_PinSocket_2.54mm:PinSocket_2x20_P2.54mm_Vertical" H 1750 2050 50  0001 C CNN
+F 3 "https://www.digikey.com/product-detail/en/sullins-connector-solutions/SFH11-PBPC-D20-ST-BK/S9200-ND/1990093" H 1750 2050 50  0001 C CNN
+	1    1750 2050
+	1    0    0    -1  
+$EndComp
+NoConn ~ 1550 1150
+NoConn ~ 1550 1250
+$Comp
+L power:+5V #PWR0101
+U 1 1 5BD9CC1E
+P 1300 1650
+F 0 "#PWR0101" H 1300 1500 50  0001 C CNN
+F 1 "+5V" H 1315 1823 50  0000 C CNN
+F 2 "" H 1300 1650 50  0001 C CNN
+F 3 "" H 1300 1650 50  0001 C CNN
+	1    1300 1650
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	1300 1650 1550 1650
+$Comp
+L power:+3V3 #PWR0102
+U 1 1 5BD9CCF3
+P 1300 2550
+F 0 "#PWR0102" H 1300 2400 50  0001 C CNN
+F 1 "+3V3" H 1315 2723 50  0000 C CNN
+F 2 "" H 1300 2550 50  0001 C CNN
+F 3 "" H 1300 2550 50  0001 C CNN
+	1    1300 2550
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	1300 2550 1550 2550
+$Comp
+L power:GND #PWR0103
+U 1 1 5BD9CD64
+P 2300 1650
+F 0 "#PWR0103" H 2300 1400 50  0001 C CNN
+F 1 "GND" H 2305 1477 50  0000 C CNN
+F 2 "" H 2300 1650 50  0001 C CNN
+F 3 "" H 2300 1650 50  0001 C CNN
+	1    2300 1650
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	2300 1650 2050 1650
+$Comp
+L power:GND #PWR0104
+U 1 1 5BD9CDEB
+P 2300 2550
+F 0 "#PWR0104" H 2300 2300 50  0001 C CNN
+F 1 "GND" H 2305 2377 50  0000 C CNN
+F 2 "" H 2300 2550 50  0001 C CNN
+F 3 "" H 2300 2550 50  0001 C CNN
+	1    2300 2550
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	2300 2550 2050 2550
+$Comp
+L Connector:DB15_Female_HighDensity_MountingHoles J2
+U 1 1 5BD9D048
+P 7150 2050
+F 0 "J2" H 7150 2917 50  0000 C CNN
+F 1 "PHOTON" H 7150 2826 50  0000 C CNN
+F 2 "Connector_Dsub:DSUB-15-HD_Female_Horizontal_P2.29x1.98mm_EdgePinOffset3.03mm_Housed_MountingHolesOffset4.94mm" H 6200 2450 50  0001 C CNN
+F 3 " ~" H 6200 2450 50  0001 C CNN
+	1    7150 2050
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:GND #PWR0105
+U 1 1 5BD9D12F
+P 7150 2750
+F 0 "#PWR0105" H 7150 2500 50  0001 C CNN
+F 1 "GND" H 7155 2577 50  0000 C CNN
+F 2 "" H 7150 2750 50  0001 C CNN
+F 3 "" H 7150 2750 50  0001 C CNN
+	1    7150 2750
+	1    0    0    -1  
+$EndComp
+Text Label 6850 1650 2    50   ~ 0
+DATA_SYNC+
+Text Label 6850 1850 2    50   ~ 0
+DATA1_OUT+
+Text Label 6850 2050 2    50   ~ 0
+DATA2_OUT+
+Text Label 6850 2250 2    50   ~ 0
+DATA_CLK+
+Text Label 6850 1550 2    50   ~ 0
+DATA_SYNC-
+Text Label 6850 1750 2    50   ~ 0
+DATA1_OUT-
+Text Label 6850 1950 2    50   ~ 0
+DATA2_OUT-
+Text Label 6850 2150 2    50   ~ 0
+DATA_CLK-
+$Comp
+L power:GND #PWR0106
+U 1 1 5BD9D377
+P 6500 2350
+F 0 "#PWR0106" H 6500 2100 50  0001 C CNN
+F 1 "GND" H 6505 2177 50  0000 C CNN
+F 2 "" H 6500 2350 50  0001 C CNN
+F 3 "" H 6500 2350 50  0001 C CNN
+	1    6500 2350
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	6500 2350 6850 2350
+NoConn ~ 6850 2450
+NoConn ~ 7450 2050
+NoConn ~ 7450 2250
+NoConn ~ 7450 2450
+$Comp
+L photon_board:SN65LVDT34D U1
+U 1 1 5BDA5F0C
+P 5250 1950
+F 0 "U1" H 5550 2500 50  0000 C CNN
+F 1 "SN65LVDT34D" H 4900 2500 50  0000 C CNN
+F 2 "Package_SO:SOIC-8_3.9x4.9mm_P1.27mm" H 5200 1300 50  0001 C CNN
+F 3 "https://www.digikey.com/product-detail/en/texas-instruments/SN65LVDT34D/296-9751-5-ND/380393" H 4550 1100 50  0001 C CNN
+	1    5250 1950
+	-1   0    0    -1  
+$EndComp
+$Comp
+L photon_board:SN65LVDT34D U2
+U 1 1 5BDA6017
+P 3500 1950
+F 0 "U2" H 3800 2500 50  0000 C CNN
+F 1 "SN65LVDT34D" H 3150 2500 50  0000 C CNN
+F 2 "Package_SO:SOIC-8_3.9x4.9mm_P1.27mm" H 3450 1300 50  0001 C CNN
+F 3 "https://www.digikey.com/product-detail/en/texas-instruments/SN65LVDT34D/296-9751-5-ND/380393" H 2800 1100 50  0001 C CNN
+	1    3500 1950
+	-1   0    0    -1  
+$EndComp
+Text Label 5700 1650 0    50   ~ 0
+DATA_CLK+
+Text Label 5700 1850 0    50   ~ 0
+DATA_CLK-
+Text Label 5700 2050 0    50   ~ 0
+DATA2_OUT+
+Text Label 5700 2250 0    50   ~ 0
+DATA2_OUT-
+Text Label 3950 1650 0    50   ~ 0
+DATA1_OUT+
+Text Label 3950 1850 0    50   ~ 0
+DATA1_OUT-
+Text Label 3950 2050 0    50   ~ 0
+DATA_SYNC+
+Text Label 3950 2250 0    50   ~ 0
+DATA_SYNC-
+$Comp
+L Device:C_Small C2
+U 1 1 5BDA6A7F
+P 3600 1250
+F 0 "C2" V 3550 1050 50  0000 C CNN
+F 1 "0.1u" V 3650 1050 50  0000 C CNN
+F 2 "Capacitor_SMD:C_0603_1608Metric_Pad1.05x0.95mm_HandSolder" H 3600 1250 50  0001 C CNN
+F 3 "~" H 3600 1250 50  0001 C CNN
+	1    3600 1250
+	0    1    1    0   
+$EndComp
+$Comp
+L Device:C_Small C1
+U 1 1 5BDA6AF5
+P 3600 1050
+F 0 "C1" V 3650 1250 50  0000 C CNN
+F 1 "1u" V 3550 1250 50  0000 C CNN
+F 2 "Capacitor_SMD:C_0603_1608Metric_Pad1.05x0.95mm_HandSolder" H 3600 1050 50  0001 C CNN
+F 3 "~" H 3600 1050 50  0001 C CNN
+	1    3600 1050
+	0    -1   -1   0   
+$EndComp
+Connection ~ 3500 1250
+Wire Wire Line
+	3500 1250 3500 1350
+$Comp
+L power:+3V3 #PWR01
+U 1 1 5BDA6D28
+P 3500 950
+F 0 "#PWR01" H 3500 800 50  0001 C CNN
+F 1 "+3V3" H 3515 1123 50  0000 C CNN
+F 2 "" H 3500 950 50  0001 C CNN
+F 3 "" H 3500 950 50  0001 C CNN
+	1    3500 950 
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	3500 950  3500 1050
+Connection ~ 3500 1050
+Wire Wire Line
+	3500 1050 3500 1250
+$Comp
+L power:GND #PWR03
+U 1 1 5BDA713C
+P 3700 1150
+F 0 "#PWR03" H 3700 900 50  0001 C CNN
+F 1 "GND" V 3705 1022 50  0000 R CNN
+F 2 "" H 3700 1150 50  0001 C CNN
+F 3 "" H 3700 1150 50  0001 C CNN
+	1    3700 1150
+	0    -1   -1   0   
+$EndComp
+Wire Wire Line
+	3700 1050 3700 1150
+Wire Wire Line
+	3700 1150 3700 1250
+Connection ~ 3700 1150
+$Comp
+L power:GND #PWR02
+U 1 1 5BDA734A
+P 3500 2550
+F 0 "#PWR02" H 3500 2300 50  0001 C CNN
+F 1 "GND" H 3505 2377 50  0000 C CNN
+F 2 "" H 3500 2550 50  0001 C CNN
+F 3 "" H 3500 2550 50  0001 C CNN
+	1    3500 2550
+	1    0    0    -1  
+$EndComp
+$Comp
+L Device:C_Small C4
+U 1 1 5BDA739E
+P 5350 1250
+F 0 "C4" V 5300 1050 50  0000 C CNN
+F 1 "0.1u" V 5400 1050 50  0000 C CNN
+F 2 "Capacitor_SMD:C_0603_1608Metric_Pad1.05x0.95mm_HandSolder" H 5350 1250 50  0001 C CNN
+F 3 "~" H 5350 1250 50  0001 C CNN
+	1    5350 1250
+	0    1    1    0   
+$EndComp
+$Comp
+L Device:C_Small C3
+U 1 1 5BDA73CA
+P 5350 1050
+F 0 "C3" V 5400 1250 50  0000 C CNN
+F 1 "1u" V 5300 1250 50  0000 C CNN
+F 2 "Capacitor_SMD:C_0603_1608Metric_Pad1.05x0.95mm_HandSolder" H 5350 1050 50  0001 C CNN
+F 3 "~" H 5350 1050 50  0001 C CNN
+	1    5350 1050
+	0    -1   -1   0   
+$EndComp
+$Comp
+L power:+3V3 #PWR04
+U 1 1 5BDA73F8
+P 5250 950
+F 0 "#PWR04" H 5250 800 50  0001 C CNN
+F 1 "+3V3" H 5265 1123 50  0000 C CNN
+F 2 "" H 5250 950 50  0001 C CNN
+F 3 "" H 5250 950 50  0001 C CNN
+	1    5250 950 
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:GND #PWR06
+U 1 1 5BDA7413
+P 5450 1150
+F 0 "#PWR06" H 5450 900 50  0001 C CNN
+F 1 "GND" V 5455 1022 50  0000 R CNN
+F 2 "" H 5450 1150 50  0001 C CNN
+F 3 "" H 5450 1150 50  0001 C CNN
+	1    5450 1150
+	0    -1   -1   0   
+$EndComp
+Wire Wire Line
+	5250 950  5250 1050
+Wire Wire Line
+	5250 1250 5250 1050
+Connection ~ 5250 1050
+Wire Wire Line
+	5250 1250 5250 1350
+Connection ~ 5250 1250
+Wire Wire Line
+	5450 1050 5450 1150
+Wire Wire Line
+	5450 1150 5450 1250
+Connection ~ 5450 1150
+$Comp
+L power:GND #PWR05
+U 1 1 5BDA768B
+P 5250 2550
+F 0 "#PWR05" H 5250 2300 50  0001 C CNN
+F 1 "GND" H 5255 2377 50  0000 C CNN
+F 2 "" H 5250 2550 50  0001 C CNN
+F 3 "" H 5250 2550 50  0001 C CNN
+	1    5250 2550
+	1    0    0    -1  
+$EndComp
+Text Label 2050 1950 0    50   ~ 0
+DATA_CLK
+Text Label 2050 2050 0    50   ~ 0
+DATA2_OUT
+Text Label 2050 2150 0    50   ~ 0
+DATA1_OUT
+Text Label 2050 2250 0    50   ~ 0
+DATA_SYNC
+Text Label 4800 1750 2    50   ~ 0
+DATA_CLK
+Text Label 4800 2150 2    50   ~ 0
+DATA2_OUT
+Text Label 3050 1750 2    50   ~ 0
+DATA1_OUT
+Text Label 3050 2150 2    50   ~ 0
+DATA_SYNC
+$EndSCHEMATC
