@@ -85,8 +85,8 @@ U 1 1 5BD9D048
 P 7150 2050
 F 0 "J2" H 7150 2917 50  0000 C CNN
 F 1 "PHOTON" H 7150 2826 50  0000 C CNN
-F 2 "Connector_Dsub:DSUB-15-HD_Female_Horizontal_P2.29x1.98mm_EdgePinOffset3.03mm_Housed_MountingHolesOffset4.94mm" H 6200 2450 50  0001 C CNN
-F 3 " ~" H 6200 2450 50  0001 C CNN
+F 2 "d_connector:DSUB-15-HD_Female_Horizontal_Pitch2.28x2.54mm_EdgePinOffset8.89mm_Housed_MountingHolesOffset11.43mm" H 6200 2450 50  0001 C CNN
+F 3 "https://www.digikey.com/product-detail/en/amphenol-fci/ICD15S13E4GX00LF/609-5181-ND/1536501" H 6200 2450 50  0001 C CNN
 	1    7150 2050
 	1    0    0    -1  
 $EndComp

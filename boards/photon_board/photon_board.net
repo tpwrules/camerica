@@ -1,7 +1,7 @@
 (export (version D)
   (design
     (source /Users/thomaswatson/drjacobs/camerica/boards/photon_board/photon_board.sch)
-    (date "Wednesday, October 31, 2018 at 09:08:50 PM")
+    (date "Tuesday, November 20, 2018 at 09:57:55 AM")
     (tool "Eeschema (5.0.0-3-g5ebb6b6)")
     (sheet (number 1) (name /) (tstamps /)
       (title_block
@@ -24,8 +24,8 @@
       (tstamp 5BD9CB75))
     (comp (ref J2)
       (value PHOTON)
-      (footprint Connector_Dsub:DSUB-15-HD_Female_Horizontal_P2.29x1.98mm_EdgePinOffset3.03mm_Housed_MountingHolesOffset4.94mm)
-      (datasheet " ~")
+      (footprint d_connector:DSUB-15-HD_Female_Horizontal_Pitch2.28x2.54mm_EdgePinOffset8.89mm_Housed_MountingHolesOffset11.43mm)
+      (datasheet https://www.digikey.com/product-detail/en/amphenol-fci/ICD15S13E4GX00LF/609-5181-ND/1536501)
       (libsource (lib Connector) (part DB15_Female_HighDensity_MountingHoles) (description "15-pin female D-SUB connector, High density (3 columns), Triple Row, Generic, VGA-connector, Mounting Hole"))
       (sheetpath (names /) (tstamps /))
       (tstamp 5BD9D048))
