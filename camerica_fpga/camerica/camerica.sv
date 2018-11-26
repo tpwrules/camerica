@@ -140,6 +140,9 @@ module camerica (
 	assign nr2_which_line = status_which_line;
 	assign nr2_which_histo = status_which_histo;
 	
+    logic set_nr_irq;
+    logic reset_nr_irq;
+    
 	logic reset_new_frame_ready_req;
 	
 	// HPS register access
@@ -147,6 +150,7 @@ module camerica (
 		hr_read_data <= 32'b0;
 		hr_acknowledge <= 1'b0;
 		reset_new_frame_ready_req <= 1'b0;
+        set_nr_irq <= 1'b0;
 		
 		if (hr_bus_enable && hr_rw) begin
 			// read access
@@ -174,6 +178,9 @@ module camerica (
 				2'd2: ; // writing is still not possible
 				2'd3: begin
 					hr3_dma_enable <= hr_write_data[1];
+                    // turn on IRQ when HPS wants to turn off DMA
+                    if (!hr_write_data[1])
+                        set_nr_irq <= 1'b1;
 					if (hr_write_data[2])
 						reset_new_frame_ready_req <= 1'b1;
 					hr3_test_pattern <= hr_write_data[3];
@@ -190,6 +197,7 @@ module camerica (
 		nr_read_data <= 32'b0;
 		nr_acknowledge <= 1'b0;
 		set_new_frame_ready_req <= 1'b0;
+        reset_nr_irq <= 1'b0;
 		
 		if (nr_bus_enable && nr_rw) begin
 			// read access
@@ -218,6 +226,9 @@ module camerica (
 				2'd2: ; // writing is still not possible
 				2'd3: begin
 					nr3_dma_active <= nr_write_data[1];
+                    // reset IRQ when nios turns off DMA
+                    if (!nr_write_data[1])
+                        reset_nr_irq <= 1'b1;
 					if (nr_write_data[2])
 						set_new_frame_ready_req <= 1'b1;
 				end
@@ -231,6 +242,12 @@ module camerica (
 		end else if (reset_new_frame_ready_req) begin
 			hr2_new_frame_ready <= 1'b0;
 		end
+        
+        if (set_nr_irq) begin
+            nr_irq <= 1'b1;
+        end else if (reset_nr_irq) begin
+            nr_irq <= 1'b0;
+        end
 	end
 
 endmodule
