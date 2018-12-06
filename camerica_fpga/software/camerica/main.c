@@ -19,7 +19,6 @@
 #define HW_REGS_FRAME_COUNTER (1)
 
 #define HW_REGS_STATUS (2)
-#define HW_REGS_STATUS_CAM_ACTIVE (1)
 #define HW_REGS_STATUS_DMA_ENABLED (2)
 #define HW_REGS_STATUS_WHICH_LINE (8)
 #define HW_REGS_STATUS_VBLANK (0x10)
@@ -28,7 +27,6 @@
 
 #define HW_REGS_CONTROL (3)
 #define HW_REGS_CONTROL_DMA_ACTIVE (2)
-#define HW_REGS_CONTROL_SET_FRAME_READY (4)
 
 #define IORD_HW_REGS_DMA_PHYS_ADDR() (IORD(HW_REGS_BASE, HW_REGS_DMA_PHYS_ADDR))
 #define IORD_HW_REGS_FRAME_COUNTER() (IORD(HW_REGS_BASE, HW_REGS_FRAME_COUNTER))
@@ -126,9 +124,6 @@ int main() {
 			ALTERA_AVALON_DMA_STATUS_BUSY_MSK));
 		// write the updated frame count
 		IOWR_HW_REGS_FRAME_COUNTER(++frame_counter);
-		// and set the bit to tell the HPS a new frame is ready
-		IOWR_HW_REGS_CONTROL(
-			IORD_HW_REGS_CONTROL() & HW_REGS_CONTROL_SET_FRAME_READY);
 	}
 }
 

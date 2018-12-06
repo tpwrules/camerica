@@ -7,7 +7,6 @@ module linereader(
 	input logic vid_pixsync,
 	input logic vid_hblank,
 	input logic vid_vblank,
-	input logic vid_visible,
 
 	// video memory access
 	output logic vm_acknowledge,
@@ -157,7 +156,7 @@ module linereader(
 				end
 				
 				VF_VBLANK: begin
-					if (vid_visible) begin
+					if (!vid_hblank && !vid_vblank) begin
 						vnstate = VF_VISIBLE;
 					end
 				end
@@ -222,11 +221,11 @@ module linereader(
 				hr_addr[8:0] = histo_curr_pix;
 				hr_wren = 1'b1;
                 
-                if (histo_chblank) begin
-                    hnstate = HF_HBLANK;
-                end else if (histo_cvblank) begin
+                if (histo_cvblank) begin
                     hnstate = HF_CLEAR_HRAM;
                     flip_which_histo = 1'b1;
+                end else if (histo_chblank) begin
+                    hnstate = HF_HBLANK;
                 end else begin
                     hnstate = HF_READ;
                 end
@@ -244,7 +243,7 @@ module linereader(
 			end
 			
 			HF_VBLANK: begin
-				if (vid_pixsync && vid_visible) begin
+				if (vid_pixsync && !vid_hblank && !vid_vblank) begin
 					hnstate = HF_READ;
 				end
 			end

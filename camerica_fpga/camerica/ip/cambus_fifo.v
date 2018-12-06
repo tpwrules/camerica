@@ -45,17 +45,17 @@ module cambus_fifo (
 	q,
 	rdempty);
 
-	input	[14:0]  data;
+	input	[13:0]  data;
 	input	  rdclk;
 	input	  rdreq;
 	input	  wrclk;
 	input	  wrreq;
-	output	[14:0]  q;
+	output	[13:0]  q;
 	output	  rdempty;
 
-	wire [14:0] sub_wire0;
+	wire [13:0] sub_wire0;
 	wire  sub_wire1;
-	wire [14:0] q = sub_wire0[14:0];
+	wire [13:0] q = sub_wire0[13:0];
 	wire  rdempty = sub_wire1;
 
 	dcfifo	dcfifo_component (
@@ -78,7 +78,7 @@ module cambus_fifo (
 		dcfifo_component.lpm_numwords = 16,
 		dcfifo_component.lpm_showahead = "OFF",
 		dcfifo_component.lpm_type = "dcfifo",
-		dcfifo_component.lpm_width = 15,
+		dcfifo_component.lpm_width = 14,
 		dcfifo_component.lpm_widthu = 4,
 		dcfifo_component.overflow_checking = "OFF",
 		dcfifo_component.rdsync_delaypipe = 5,
@@ -111,11 +111,11 @@ endmodule
 // Retrieval info: PRIVATE: SYNTH_WRAPPER_GEN_POSTFIX STRING "0"
 // Retrieval info: PRIVATE: UNDERFLOW_CHECKING NUMERIC "1"
 // Retrieval info: PRIVATE: UsedW NUMERIC "1"
-// Retrieval info: PRIVATE: Width NUMERIC "15"
+// Retrieval info: PRIVATE: Width NUMERIC "14"
 // Retrieval info: PRIVATE: dc_aclr NUMERIC "0"
 // Retrieval info: PRIVATE: diff_widths NUMERIC "0"
 // Retrieval info: PRIVATE: msb_usedw NUMERIC "0"
-// Retrieval info: PRIVATE: output_width NUMERIC "15"
+// Retrieval info: PRIVATE: output_width NUMERIC "14"
 // Retrieval info: PRIVATE: rsEmpty NUMERIC "1"
 // Retrieval info: PRIVATE: rsFull NUMERIC "0"
 // Retrieval info: PRIVATE: rsUsedW NUMERIC "0"
@@ -129,26 +129,26 @@ endmodule
 // Retrieval info: CONSTANT: LPM_NUMWORDS NUMERIC "16"
 // Retrieval info: CONSTANT: LPM_SHOWAHEAD STRING "OFF"
 // Retrieval info: CONSTANT: LPM_TYPE STRING "dcfifo"
-// Retrieval info: CONSTANT: LPM_WIDTH NUMERIC "15"
+// Retrieval info: CONSTANT: LPM_WIDTH NUMERIC "14"
 // Retrieval info: CONSTANT: LPM_WIDTHU NUMERIC "4"
 // Retrieval info: CONSTANT: OVERFLOW_CHECKING STRING "OFF"
 // Retrieval info: CONSTANT: RDSYNC_DELAYPIPE NUMERIC "5"
 // Retrieval info: CONSTANT: UNDERFLOW_CHECKING STRING "OFF"
 // Retrieval info: CONSTANT: USE_EAB STRING "ON"
 // Retrieval info: CONSTANT: WRSYNC_DELAYPIPE NUMERIC "5"
-// Retrieval info: USED_PORT: data 0 0 15 0 INPUT NODEFVAL "data[14..0]"
-// Retrieval info: USED_PORT: q 0 0 15 0 OUTPUT NODEFVAL "q[14..0]"
+// Retrieval info: USED_PORT: data 0 0 14 0 INPUT NODEFVAL "data[13..0]"
+// Retrieval info: USED_PORT: q 0 0 14 0 OUTPUT NODEFVAL "q[13..0]"
 // Retrieval info: USED_PORT: rdclk 0 0 0 0 INPUT NODEFVAL "rdclk"
 // Retrieval info: USED_PORT: rdempty 0 0 0 0 OUTPUT NODEFVAL "rdempty"
 // Retrieval info: USED_PORT: rdreq 0 0 0 0 INPUT NODEFVAL "rdreq"
 // Retrieval info: USED_PORT: wrclk 0 0 0 0 INPUT NODEFVAL "wrclk"
 // Retrieval info: USED_PORT: wrreq 0 0 0 0 INPUT NODEFVAL "wrreq"
-// Retrieval info: CONNECT: @data 0 0 15 0 data 0 0 15 0
+// Retrieval info: CONNECT: @data 0 0 14 0 data 0 0 14 0
 // Retrieval info: CONNECT: @rdclk 0 0 0 0 rdclk 0 0 0 0
 // Retrieval info: CONNECT: @rdreq 0 0 0 0 rdreq 0 0 0 0
 // Retrieval info: CONNECT: @wrclk 0 0 0 0 wrclk 0 0 0 0
 // Retrieval info: CONNECT: @wrreq 0 0 0 0 wrreq 0 0 0 0
-// Retrieval info: CONNECT: q 0 0 15 0 @q 0 0 15 0
+// Retrieval info: CONNECT: q 0 0 14 0 @q 0 0 14 0
 // Retrieval info: CONNECT: rdempty 0 0 0 0 @rdempty 0 0 0 0
 // Retrieval info: GEN_FILE: TYPE_NORMAL cambus_fifo.v TRUE
 // Retrieval info: GEN_FILE: TYPE_NORMAL cambus_fifo.inc FALSE

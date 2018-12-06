@@ -15,8 +15,6 @@ module cambus (
 	output logic vid_pixsync,
 	output logic vid_hblank,
 	output logic vid_vblank,
-	output logic vid_visible,
-	output logic vid_locked,
 	
 	input logic show_test_pattern
 );
@@ -33,19 +31,6 @@ module cambus (
         cam_rst_sync2 <= cam_rst_sync1;
         cam_rst_sync1 <= rst === 1'b1 ? 1'b1 : 1'b0;
     end
-    
-    logic cam_locked;
-    
-	cambus_lockdet lockdet(
-		.clk(clk),
-		.rst(rst),
-		
-        .cam_clk(cam_clk),
-		.cam_hsync(cam_hsync),
-		.cam_vsync(cam_vsync),
-		
-		.cam_locked(cam_locked)
-	);
     
     // buffer the cambus input because we have no idea
     // what the setup and hold and etc is
@@ -77,7 +62,7 @@ module cambus (
             lines <= 9'd0;
         end
         
-        if (!cam_locked || cam_rst) begin
+        if (cam_rst) begin
             last_hsync <= 1'b0;
             last_vsync <= 1'b0;
             pixels <= 9'd0;
@@ -97,10 +82,10 @@ module cambus (
     
     // use FIFO to push everything into the vid domain
     logic fifo_rdempty, fifo_rdreq;
-    logic [14:0] fifo_out;
+    logic [13:0] fifo_out;
     cambus_fifo fifo(
         //     cam_hblank  cam_vblank
-        .data({!h_visible, !v_visible, cam_locked, cam_pixel_out}),
+        .data({!h_visible, !v_visible, cam_pixel_out}),
         .wrclk(cam_clk),
         .wrreq(!cam_rst),
         
@@ -117,25 +102,8 @@ module cambus (
         vid_pixsync <= fifo_rdreq;
     end
     // and hook up all the vid_ side data
-    assign {vid_hblank, vid_vblank, vid_locked, vid_pixel} = fifo_out;
-    assign vid_visible = !vid_hblank && !vid_vblank;
+    assign {vid_hblank, vid_vblank, vid_pixel} = fifo_out;
 
 endmodule
 
-// this module detects if the camera bus is locked
-module cambus_lockdet (
-	input logic clk,
-    input logic rst,
-    
-    input logic cam_clk,
-	input logic cam_hsync,
-	input logic cam_vsync,
-	
-	output logic cam_locked
-);
-
-	// for now, just claim it's locked
-	assign cam_locked = 1'b1;
-	
-endmodule
 

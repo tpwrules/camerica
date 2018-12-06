@@ -35,8 +35,6 @@ class Registers:
         
         # set some important default values
         self.dma_enabled = False # don't stomp over random memory
-        self.frame_ready = False # don't assume frame is there
-        self.irq_enabled = False # don't interrupt until we're ready
         
     def __del__(self):
         # be nice and clean up our file descriptor
@@ -65,16 +63,8 @@ class Registers:
         return int.from_bytes(self._regs[8:12], byteorder='little')
     
     @property
-    def cam_active(self):
-        return True if self.status & 1 else False
-    
-    @property
     def dma_active(self):
         return True if self.status & 2 else False
-    
-    @property
-    def frame_ready(self):
-        return True if self.status & 4 else False
         
         
     @property
@@ -95,12 +85,6 @@ class Registers:
             self.control |= 2
         else:
             self.control &= ~2
-            
-    @frame_ready.setter
-    def frame_ready(self, value):
-        # whatever the value, write 1 to clear the
-        # frame ready status bit
-        self.control |= 4
         
     @property
     def test_pattern(self):
@@ -112,17 +96,6 @@ class Registers:
             self.control |= 8
         else:
             self.control &= ~8
-            
-    @property
-    def irq_enabled(self):
-        return True if self.control & 16 else False
-    
-    @irq_enabled.setter
-    def irq_enabled(self, value):
-        if value:
-            self.control |= 16
-        else:
-            self.control &= ~16
             
             
 class UDMABuf:
