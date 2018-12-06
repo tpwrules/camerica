@@ -70,7 +70,7 @@ module camerica (
 		.clk(clk),
 		.rst(rst || !vid_locked),
 		
-		.vid_pixel(vid_pixel),
+		.vid_pixel({vid_pixel, 4'b0}),
 		.vid_pixsync(vid_pixsync),
 		.vid_hblank(vid_hblank),
 		.vid_vblank(vid_vblank),

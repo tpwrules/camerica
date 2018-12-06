@@ -3,7 +3,7 @@ module linereader(
 	input logic rst,
 	
 	// video input
-	input logic [11:0] vid_pixel,
+	input logic [15:0] vid_pixel,
 	input logic vid_pixsync,
 	input logic vid_hblank,
 	input logic vid_vblank,
@@ -22,11 +22,11 @@ module linereader(
 );
 	
 	// instantiate the two memories
-	logic [11:0] lr_data_in;
+	logic [15:0] lr_data_in;
 	logic [8:0] lr_vma_addr;
 	logic [10:0] lr_addr;
 	logic lr_wren;
-	logic [47:0] lr_vma_data_out;
+	logic [63:0] lr_vma_data_out;
 	line_ram line_ram(
 		.clock(clk),
 		.rdaddress(lr_vma_addr),
@@ -64,11 +64,7 @@ module linereader(
 	logic vma_should_read;
 	assign vma_should_read = vm_rw && vm_bus_enable;
 	logic [63:0] lr_vma_result;
-	assign lr_vma_result = 
-		{lr_vma_data_out[47:36], 4'b0,
-		 lr_vma_data_out[35:24], 4'b0,
-		 lr_vma_data_out[23:12], 4'b0,
-		 lr_vma_data_out[11:0],  4'b0};
+	assign lr_vma_result = lr_vma_data_out;
 	logic [63:0] hr_vma_result;
 	assign hr_vma_result = 
 		{5'b0, hr_vma_data_out[53:27],
@@ -102,6 +98,14 @@ module linereader(
 	logic [9:0] xpos;
 	
 	logic flip_which_line;
+    
+    // for the video input
+    // a new pixel is loaded the clock cycle vid_pixsync is asserted
+    // the pixel data is delayed by one pixel sync cycle relative to 
+    // hblank, vblank, and visible. that is, if hblank is asserted when
+    // vid_pixsync is asserted, the pixel data the next time vid_pixsync
+    // is asserted will be the first pixel of the horizontal blank, but the
+    // pixel data when hblank is asserted will be recorded
 	
 	always @(posedge clk) begin
 		if (rst) begin
@@ -115,7 +119,7 @@ module linereader(
 			if (vid_pixsync)
 				xpos <= xpos + 1'd1;
 		end else begin
-			xpos <= 9'd0;
+			xpos <= 10'd0;
 		end
 		
 		if (flip_which_line) begin
@@ -190,7 +194,7 @@ module linereader(
 		end
 		
 		if (vid_pixsync) begin
-			histo_curr_pix <= vid_pixel[11:3];
+			histo_curr_pix <= vid_pixel[15:7];
             histo_chblank <= vid_hblank;
             histo_cvblank <= vid_vblank;
 		end
@@ -205,7 +209,7 @@ module linereader(
 		hnstate = hcstate;
 		flip_which_histo = 1'b0;
 		hr_wren = 1'b0;
-		hr_addr[8:0] = vid_pixel[11:3];
+		hr_addr[8:0] = vid_pixel[15:7];
 		
 		case (hcstate)
 			HF_READ: begin
