@@ -1,4 +1,4 @@
-module cambus (
+module cambus_merlin (
 	// this module is responsible for retiming the camera bus
 	// to the 50MHz clock, as well as generating blanking signals
 	input logic clk,
@@ -14,9 +14,7 @@ module cambus (
 	output logic [11:0] vid_pixel,
 	output logic vid_pixsync,
 	output logic vid_hblank,
-	output logic vid_vblank,
-	
-	input logic show_test_pattern
+	output logic vid_vblank
 );
 
     // cam_ signals are synchronous to the camera clock
@@ -83,7 +81,7 @@ module cambus (
     // use FIFO to push everything into the vid domain
     logic fifo_rdempty, fifo_rdreq;
     logic [13:0] fifo_out;
-    cambus_fifo fifo(
+    cambus_merlin_fifo fifo(
         //     cam_hblank  cam_vblank
         .data({!h_visible, !v_visible, cam_pixel_out}),
         .wrclk(cam_clk),

@@ -248,18 +248,24 @@ vga_pll  vga_pll_inst(
         .locked()    //  locked.export
 );
 
-
-	logic [33:0] GPIO0;
+    
+    // the camera type switches the vid bus
+    logic [3:0] cam_type;
+    
+    // retime the merlin to the video bus
+    logic [11:0] vid_pixel_merlin;
+    logic vid_pixsync_merlin;
+    logic vid_hblank_merlin, vid_vblank_merlin;
+    
+    // too lazy to figure out the mapping from the DE0
+    logic [33:0] GPIO0;
 	
 	assign GPIO0[0] = GPIO[1];
 	assign GPIO0[1] = GPIO[3];
 	assign GPIO0[33:2] = GPIO[35:4];
-	
-
-	wire [11:0] cam_pixel_in, cam_pixel;
-	wire cam_hsync, cam_vsync, cam_clk;
-	
-	assign cam_pixel_in = {
+    
+    logic [11:0] cam_pixel_merlin;
+    assign cam_pixel_merlin = {
 		// from MSB to LSB
 		GPIO0[21],
 		GPIO0[19],
@@ -276,12 +282,45 @@ vga_pll  vga_pll_inst(
 		GPIO0[1],
 		GPIO0[0]
 	};
-	
-	assign cam_pixel = SW[0] ? ~cam_pixel_in : cam_pixel_in;
-	
-	assign cam_hsync = GPIO0[25];
-	assign cam_vsync = GPIO0[23];
-	assign cam_clk = GPIO0[27];
+    
+    
+    cambus_merlin cambus_merlin(
+		.clk(CLOCK_50),
+		.rst(1'b0),
+		
+		.cam_clk(GPIO0[27]),
+		.cam_pixel(cam_pixel_merlin),
+		.cam_hsync(GPIO0[25]),
+		.cam_vsync(GPIO0[23]),
+		
+		.vid_pixel(vid_pixel_merlin),
+		.vid_pixsync(vid_pixsync_merlin),
+		.vid_hblank(vid_hblank_merlin),
+		.vid_vblank(vid_vblank_merlin)
+	);
+    
+    
+    // select camera based on type
+    logic [15:0] vid_pixel;
+    logic vid_pixsync, vid_hblank, vid_vblank;
+    always @(*) begin
+        case (cam_type)
+            4'd1: begin // merlin
+                vid_pixel <= {vid_pixel_merlin, 4'b0};
+                vid_pixsync <= vid_pixsync_merlin;
+                vid_hblank <= vid_hblank_merlin;
+                vid_vblank <= vid_vblank_merlin;
+            end
+            default: begin
+                // also if cam_type is 0
+                // don't output anything
+                vid_pixel <= 16'b0;
+                vid_pixsync <= 1'b0;
+                vid_hblank <= 1'b0;
+                vid_vblank <= 1'b0;
+            end
+        endcase
+    end
 	
 	
 	// NIOS register access
@@ -312,10 +351,12 @@ vga_pll  vga_pll_inst(
 		.clk(CLOCK_50),
 		.rst(1'b0),
 		
-		.cam_clk(cam_clk),
-		.cam_pixel(cam_pixel),
-		.cam_hsync(cam_hsync),
-		.cam_vsync(cam_vsync),
+		.vid_pixel(vid_pixel),
+        .vid_pixsync(vid_pixsync),
+		.vid_hblank(vid_hblank),
+		.vid_vblank(vid_vblank),
+        
+        .cam_type(cam_type),
 		
 		.nr_acknowledge(nr_acknowledge),
 		.nr_irq(nr_irq),

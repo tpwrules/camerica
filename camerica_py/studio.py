@@ -80,6 +80,10 @@ try:
                 elif event.key == pygame.K_RIGHT and mode == "play":
                     if handler.vid_frame < handler.saved_frames-1:
                         handler.seek(handler.vid_frame+1)
+                elif event.key == pygame.K_c and mode != "play":
+                    t = handler.hw_regs.cam_type
+                    handler.hw_regs.cam_type = \
+                        vidhandler.hw.CameraType((t + 1) % 3)
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 pos = pygame.mouse.get_pos()
                 for widget in widget_list:

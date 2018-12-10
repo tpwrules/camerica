@@ -3,12 +3,13 @@ module camerica (
 	input logic clk,
 	input logic rst,
 	
-	// camera bus
-	
-	input logic cam_clk,
-	input logic [11:0] cam_pixel,
-	input logic cam_hsync,
-	input logic cam_vsync,
+	// input video bus
+    input logic [15:0] vid_pixel,
+    input logic vid_pixsync,
+    input logic vid_hblank,
+    input logic vid_vblank,
+    
+    output logic [3:0] cam_type,
 
 	// Qsys interconnects
 	
@@ -37,37 +38,17 @@ module camerica (
 	output logic [63:0] vm_read_data
 );
 
-	// retime the camera to the main clock
-	logic [11:0] vid_pixel;
-	logic vid_pixsync, vid_hblank, vid_vblank;
 	logic show_test_pattern;
-	cambus cambus(
-		.clk(clk),
-		.rst(rst),
-		
-		.cam_clk(cam_clk),
-		.cam_pixel(cam_pixel),
-		.cam_hsync(cam_hsync),
-		.cam_vsync(cam_vsync),
-		
-		.vid_pixel(vid_pixel),
-		.vid_pixsync(vid_pixsync),
-		.vid_hblank(vid_hblank),
-		.vid_vblank(vid_vblank),
-		
-		.show_test_pattern(show_test_pattern)
-	);
 	
 	logic status_which_line;
 	logic status_which_histo;
-    logic [3:0] cam_type;
 	
 	// the linereader module actually reads the lines into memory
 	linereader linereader(
 		.clk(clk),
 		.rst(rst),
 		
-		.vid_pixel({vid_pixel, 4'b0}),
+		.vid_pixel(vid_pixel),
 		.vid_pixsync(vid_pixsync),
 		.vid_hblank(vid_hblank),
 		.vid_vblank(vid_vblank),
