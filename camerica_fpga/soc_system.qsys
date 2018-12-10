@@ -462,7 +462,7 @@
   <parameter name="F2SCLK_WARMRST_Enable" value="true" />
   <parameter name="F2SDRAM_Type">Avalon-MM Write-Only</parameter>
   <parameter name="F2SDRAM_Width" value="64" />
-  <parameter name="F2SINTERRUPT_Enable" value="true" />
+  <parameter name="F2SINTERRUPT_Enable" value="false" />
   <parameter name="F2S_Width" value="3" />
   <parameter name="FIX_READ_LATENCY" value="8" />
   <parameter name="FORCED_NON_LDC_ADDR_CMD_MEM_CK_INVERT" value="false" />
@@ -1357,13 +1357,6 @@
    version="18.0"
    start="vga_stream.out_clk"
    end="alt_vip_itc_0.is_clk_rst" />
- <connection
-   kind="interrupt"
-   version="18.0"
-   start="hps_0.f2h_irq0"
-   end="hps_vid_regs.interrupt">
-  <parameter name="irqNumber" value="0" />
- </connection>
  <connection
    kind="interrupt"
    version="18.0"

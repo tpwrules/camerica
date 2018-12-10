@@ -295,7 +295,6 @@ vga_pll  vga_pll_inst(
 
 	// HPS register access
 	logic hr_acknowledge;
-	logic hr_irq;
 	logic [3:0] hr_address;
 	logic hr_bus_enable;
 	logic hr_rw;
@@ -327,7 +326,6 @@ vga_pll  vga_pll_inst(
 		.nr_read_data(nr_read_data),
 		
 		.hr_acknowledge(hr_acknowledge),
-		.hr_irq(hr_irq),
 		.hr_address(hr_address[3:2]),
 		.hr_bus_enable(hr_bus_enable),
 		.hr_rw(hr_rw),
@@ -352,7 +350,7 @@ soc_system u0 (
 		.nios_vid_regs_read_data(nr_read_data),
 		
 		.hps_vid_regs_acknowledge(hr_acknowledge),
-		.hps_vid_regs_irq(hr_irq),
+		.hps_vid_regs_irq(1'b0),
 		.hps_vid_regs_address(hr_address),
 		.hps_vid_regs_bus_enable(hr_bus_enable),
 		.hps_vid_regs_rw(hr_rw),

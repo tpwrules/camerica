@@ -2,8 +2,8 @@
 <sch:Settings xmlns:sch="http://www.altera.com/embeddedsw/bsp/schema">
         <BspType>hal</BspType>
         <BspVersion>default</BspVersion>
-        <BspGeneratedTimeStamp>Dec 6, 2018 10:59:05 AM</BspGeneratedTimeStamp>
-        <BspGeneratedUnixTimeStamp>1544115545997</BspGeneratedUnixTimeStamp>
+        <BspGeneratedTimeStamp>Dec 10, 2018 10:12:44 AM</BspGeneratedTimeStamp>
+        <BspGeneratedUnixTimeStamp>1544458364266</BspGeneratedUnixTimeStamp>
         <BspGeneratedLocation>C:\Users\thomas\Documents\merlin\de10std\camerica_fpga\software\camerica_bsp</BspGeneratedLocation>
         <BspSettingsFile>settings.bsp</BspSettingsFile>
         <SopcDesignFile>..\..\soc_system.sopcinfo</SopcDesignFile>

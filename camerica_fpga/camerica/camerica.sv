@@ -23,7 +23,6 @@ module camerica (
 	
 	// HPS register access
 	output logic hr_acknowledge,
-	output logic hr_irq,
 	input logic [1:0] hr_address,
 	input logic hr_bus_enable,
 	input logic hr_rw,
@@ -127,17 +126,13 @@ module camerica (
 	
     logic set_nr_irq;
     logic reset_nr_irq;
-    
-    assign hr_irq = 1'b0;
-    
 	
 	// HPS register access
 	always @(posedge clk) begin
-		hr_read_data <= 32'b0;
 		hr_acknowledge <= 1'b0;
         set_nr_irq <= 1'b0;
 		
-		if (hr_bus_enable && hr_rw) begin
+		if (hr_bus_enable && !hr_acknowledge && hr_rw) begin
 			// read access
 			hr_acknowledge <= 1'b1;
 			case (hr_address)
@@ -152,7 +147,7 @@ module camerica (
 					hr3_dma_enable,
 					1'b0};
 			endcase
-		end else if (hr_bus_enable && !hr_rw) begin
+		end else if (hr_bus_enable && !hr_acknowledge && !hr_rw) begin
 			// write access
 			hr_acknowledge <= 1'b1;
 			case (hr_address)
@@ -172,11 +167,10 @@ module camerica (
 	
 	// NIOS register access
 	always @(posedge clk) begin
-		nr_read_data <= 32'b0;
 		nr_acknowledge <= 1'b0;
         reset_nr_irq <= 1'b0;
 		
-		if (nr_bus_enable && nr_rw) begin
+		if (nr_bus_enable && !nr_acknowledge && nr_rw) begin
 			// read access
 			nr_acknowledge <= 1'b1;
 			case (nr_address)
@@ -194,7 +188,7 @@ module camerica (
 					nr3_dma_active,
 					1'b0};
 			endcase
-		end else if (nr_bus_enable && !nr_rw) begin
+		end else if (nr_bus_enable && !nr_acknowledge && !nr_rw) begin
 			// write access
 			nr_acknowledge <= 1'b1;
 			case (nr_address)
