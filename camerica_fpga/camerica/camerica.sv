@@ -60,6 +60,7 @@ module camerica (
 	
 	logic status_which_line;
 	logic status_which_histo;
+    logic [3:0] cam_type;
 	
 	// the linereader module actually reads the lines into memory
 	linereader linereader(
@@ -93,6 +94,8 @@ module camerica (
 	logic hr3_dma_enable; // bit 1
 	// bit 2 unused
 	logic hr3_test_pattern; // bit 3
+    // bits 4-7 unused
+    logic [3:0] hr3_cam_type; // bits 11-8
 	
 	// NIOS registers
 	logic [31:0] nr0_dma_addr;
@@ -104,6 +107,8 @@ module camerica (
 	logic nr2_vblank; // bit 4
 	logic nr2_hblank; // bit 5
 	logic nr2_which_histo; // bit 6
+    // bit 7 unused
+    logic [3:0] nr2_cam_type; // bits 11-8
 	// control
 	// bit 0 unused
 	logic nr3_dma_active; // bit 1
@@ -116,6 +121,10 @@ module camerica (
 	// cross connect dma lines
 	assign hr2_dma_active = nr3_dma_active;
 	assign nr2_dma_enable = hr3_dma_enable;
+    
+    // and camera type
+    assign cam_type = hr3_cam_type;
+    assign nr2_cam_type = hr3_cam_type;
 	
 	// remaining control signals
 	assign show_test_pattern = hr3_test_pattern;
@@ -141,7 +150,9 @@ module camerica (
 				2'd2: hr_read_data <= {30'b0,
 					hr2_dma_active,
 					1'b0};
-				2'd3: hr_read_data <= {28'b0,
+				2'd3: hr_read_data <= {20'b0,
+                    hr3_cam_type,
+                    4'b0,
 					hr3_test_pattern,
 					1'b0,
 					hr3_dma_enable,
@@ -160,6 +171,7 @@ module camerica (
                     if (!hr_write_data[1])
                         set_nr_irq <= 1'b1;
 					hr3_test_pattern <= hr_write_data[3];
+                    hr3_cam_type <= hr_write_data[11:8];
 				end
 			endcase
 		end
@@ -176,7 +188,9 @@ module camerica (
 			case (nr_address)
 				2'd0: nr_read_data <= nr0_dma_addr;
 				2'd1: nr_read_data <= nr1_frame_counter;
-				2'd2: nr_read_data <= {25'b0,
+				2'd2: nr_read_data <= {20'b0,
+                    nr2_cam_type,
+                    1'b0,
 					nr2_which_histo,
 					nr2_hblank,
 					nr2_vblank,

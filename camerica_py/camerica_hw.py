@@ -5,6 +5,7 @@ import struct
 import os
 import mmap
 import numpy as np
+from enum import IntEnum
 
 # where the camerica regs are in HPS memory space
 # they're attached to the lightweight FPGA bus
@@ -21,6 +22,13 @@ if CAMERICA_REG_BASE % mmap.ALLOCATIONGRANULARITY != 0:
 def is_hardware_present():
     # we really should check...
     return True
+    
+# which camera the hardware should expect
+# if NONE, all cameras are disconnected
+class CameraType(IntEnum):
+    NONE = 0
+    MERLIN = 1
+    PHOTON_640 = 2
 
 # map the camerica hardware registers, then
 # provide a way to access them easily
@@ -35,6 +43,7 @@ class Registers:
         
         # set some important default values
         self.dma_enabled = False # don't stomp over random memory
+        self.cam_type = CameraType.NONE # don't connect a camera
         
     def __del__(self):
         # be nice and clean up our file descriptor
@@ -97,6 +106,20 @@ class Registers:
         else:
             self.control &= ~8
             
+    @property
+    def cam_type(self):
+        t = (self.control & 0xF00) >> 8
+        try:
+            return CameraType(t)
+        except ValueError: # hardware may have a nonsense value
+            return CameraType.NONE
+            
+    @cam_type.setter
+    def cam_type(self, value):
+        if not isinstance(value, CameraType):
+            raise ValueError(
+                "expected a CameraType, not {}".format(repr(value)))
+        self.control = (self.control & 0xFFFFF0FF) | (value.value << 8)
             
 class UDMABuf:
     def __init__(self, name):
