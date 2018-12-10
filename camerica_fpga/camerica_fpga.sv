@@ -299,6 +299,26 @@ vga_pll  vga_pll_inst(
 		.vid_vblank(vid_vblank_merlin)
 	);
     
+    // retime the photon 640 to the video bus
+    logic [13:0] vid_pixel_photon;
+    logic vid_pixsync_photon;
+    logic vid_hblank_photon, vid_vblank_photon;
+    
+    cambus_photon cambus_photon(
+		.clk(CLOCK_50),
+		.rst(1'b0),
+		
+		.cam_DATA_CLK(GPIO[15]),
+        .cam_DATA_SYNC(GPIO[21]),
+        .cam_DATA1_OUT(GPIO[19]),
+        .cam_DATA2_OUT(GPIO[17]),
+        
+		.vid_pixel(vid_pixel_photon),
+		.vid_pixsync(vid_pixsync_photon),
+		.vid_hblank(vid_hblank_photon),
+		.vid_vblank(vid_vblank_photon)
+	);
+    
     
     // select camera based on type
     logic [15:0] vid_pixel;
@@ -310,6 +330,12 @@ vga_pll  vga_pll_inst(
                 vid_pixsync <= vid_pixsync_merlin;
                 vid_hblank <= vid_hblank_merlin;
                 vid_vblank <= vid_vblank_merlin;
+            end
+            4'd2: begin // photon 640
+                vid_pixel <= {vid_pixel_photon, 2'b0};
+                vid_pixsync <= vid_pixsync_photon;
+                vid_hblank <= vid_hblank_photon;
+                vid_vblank <= vid_vblank_photon;
             end
             default: begin
                 // also if cam_type is 0
