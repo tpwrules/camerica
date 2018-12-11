@@ -42,6 +42,7 @@ module camerica (
 	
 	logic status_which_line;
 	logic status_which_histo;
+    logic new_dma_phys;
 	
 	// the linereader module actually reads the lines into memory
 	linereader linereader(
@@ -69,30 +70,37 @@ module camerica (
 	logic [31:0] hr0_dma_addr;
 	logic [31:0] hr1_frame_counter;
 	// status
+    // bit 0 unused
 	logic hr2_dma_active; // bit 1
+    // bits 2-6 unused
+    logic hr2_new_dma_phys; // bit 7
 	// control
 	// bit 0 unused
 	logic hr3_dma_enable; // bit 1
 	// bit 2 unused
 	logic hr3_test_pattern; // bit 3
-    // bits 4-7 unused
+    // bits 4-6 unused
+    logic hr3_set_new_dma_phys; // bit 7
     logic [3:0] hr3_cam_type; // bits 11-8
 	
 	// NIOS registers
 	logic [31:0] nr0_dma_addr;
 	logic [31:0] nr1_frame_counter;
 	// status
+    // bit 0 unused
 	logic nr2_dma_enable; // bit 1
 	// bit 2 unused
 	logic nr2_which_line; // bit 3
 	logic nr2_vblank; // bit 4
 	logic nr2_hblank; // bit 5
 	logic nr2_which_histo; // bit 6
-    // bit 7 unused
+    logic nr2_new_dma_phys; // bit 7
     logic [3:0] nr2_cam_type; // bits 11-8
 	// control
 	// bit 0 unused
 	logic nr3_dma_active; // bit 1
+    // bits 2-6 unused
+    logic nr3_reset_new_dma_phys; // bit 7
 	
 	// HPS writes dma addr
 	assign nr0_dma_addr = hr0_dma_addr;
@@ -113,6 +121,8 @@ module camerica (
 	assign nr2_hblank = vid_hblank;
 	assign nr2_which_line = status_which_line;
 	assign nr2_which_histo = status_which_histo;
+    assign hr2_new_dma_phys = new_dma_phys;
+    assign nr2_new_dma_phys = new_dma_phys;
 	
     logic set_nr_irq;
     logic reset_nr_irq;
@@ -121,6 +131,7 @@ module camerica (
 	always @(posedge clk) begin
 		hr_acknowledge <= 1'b0;
         set_nr_irq <= 1'b0;
+        hr3_set_new_dma_phys <= 1'b0;
 		
 		if (hr_bus_enable && !hr_acknowledge && hr_rw) begin
 			// read access
@@ -129,6 +140,8 @@ module camerica (
 				2'd0: hr_read_data <= hr0_dma_addr;
 				2'd1: hr_read_data <= hr1_frame_counter;
 				2'd2: hr_read_data <= {30'b0,
+                    hr2_new_dma_phys,
+                    5'b0,
 					hr2_dma_active,
 					1'b0};
 				2'd3: hr_read_data <= {20'b0,
@@ -152,6 +165,8 @@ module camerica (
                     if (!hr_write_data[1])
                         set_nr_irq <= 1'b1;
 					hr3_test_pattern <= hr_write_data[3];
+                    if (hr_write_data[7])
+                        hr3_set_new_dma_phys <= 1'b1;
                     hr3_cam_type <= hr_write_data[11:8];
 				end
 			endcase
@@ -162,6 +177,7 @@ module camerica (
 	always @(posedge clk) begin
 		nr_acknowledge <= 1'b0;
         reset_nr_irq <= 1'b0;
+        nr3_reset_new_dma_phys <= 1'b0;
 		
 		if (nr_bus_enable && !nr_acknowledge && nr_rw) begin
 			// read access
@@ -171,7 +187,7 @@ module camerica (
 				2'd1: nr_read_data <= nr1_frame_counter;
 				2'd2: nr_read_data <= {20'b0,
                     nr2_cam_type,
-                    1'b0,
+                    nr2_new_dma_phys,
 					nr2_which_histo,
 					nr2_hblank,
 					nr2_vblank,
@@ -195,6 +211,8 @@ module camerica (
                     // reset IRQ when nios turns off DMA
                     if (!nr_write_data[1])
                         reset_nr_irq <= 1'b1;
+                    if (nr_write_data[7])
+                        nr3_reset_new_dma_phys <= 1'b1;
 				end
 			endcase
 		end
@@ -205,6 +223,12 @@ module camerica (
             nr_irq <= 1'b1;
         end else if (reset_nr_irq) begin
             nr_irq <= 1'b0;
+        end
+        
+        if (hr3_set_new_dma_phys) begin
+            new_dma_phys <= 1'b1;
+        end else if (nr3_reset_new_dma_phys) begin
+            new_dma_phys <= 1'b0;
         end
 	end
 

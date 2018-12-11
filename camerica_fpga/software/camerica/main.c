@@ -24,9 +24,11 @@
 #define HW_REGS_STATUS_VBLANK (0x10)
 #define HW_REGS_STATUS_HBLANK (0x20)
 #define HW_REGS_STATUS_WHICH_HISTO (0x40)
+#define HW_REGS_STATUS_NEW_DMA_PHYS (0x80)
 
 #define HW_REGS_CONTROL (3)
 #define HW_REGS_CONTROL_DMA_ACTIVE (2)
+#define HW_REGS_CONTROL_CLEAR_NEW_DMA_PHYS (0x80)
 
 #define IORD_HW_REGS_DMA_PHYS_ADDR() (IORD(HW_REGS_BASE, HW_REGS_DMA_PHYS_ADDR))
 #define IORD_HW_REGS_FRAME_COUNTER() (IORD(HW_REGS_BASE, HW_REGS_FRAME_COUNTER))
@@ -52,41 +54,54 @@ static void dma_off_irq(void* ctx, long unsigned int something) {
 	while ((IORD_ALTERA_AVALON_DMA_STATUS(VID_DMA_BASE) &
 		ALTERA_AVALON_DMA_STATUS_BUSY_MSK));
 	DMA_OFF();
-	// tell HPS that it's done
-	IOWR_HW_REGS_CONTROL(IORD_HW_REGS_CONTROL() & ~HW_REGS_CONTROL_DMA_ACTIVE);
+	// tell HPS that it's done (and clear dma stuff)
+	IOWR_HW_REGS_CONTROL(HW_REGS_CONTROL_CLEAR_NEW_DMA_PHYS);
 	// and reset the NIOS to start the process over
 	NIOS2_WRITE_STATUS(0);
 	NIOS2_WRITE_IENABLE(0);
 	((void (*) (void)) NIOS2_RESET_ADDR) ();
 }
 
+static uint32_t frame_addrs[32];
+
 int main() {
 	IOWR_HW_REGS_FRAME_COUNTER(0);
-	
+	IOWR_HW_REGS_CONTROL(0);
+
+	uint32_t dest = 0;
+
+	// start receiving DMA addresses from HPS
+	while (dest != 0xFF) {
+		// wait for a new address
+		while (!(IORD_HW_REGS_STATUS() & HW_REGS_STATUS_NEW_DMA_PHYS));
+		uint32_t val = IORD_HW_REGS_DMA_PHYS_ADDR();
+		dest = val & 0xFF;
+		// store it
+		if (dest != 0xFF)
+			frame_addrs[dest] = val & 0xFFFFFF00;
+		// and clear the new fact so the HPS gives us another one
+		IOWR_HW_REGS_CONTROL(HW_REGS_CONTROL_CLEAR_NEW_DMA_PHYS);
+	}
+
 	// enable the DMA turnoff notification IRQ
 	alt_irq_register(NIOS_VID_REGS_IRQ, 0, dma_off_irq);
 	alt_irq_cpu_enable_interrupts();
 
-	// wait until the HPS wants DMA to be enabled
+	// now wait until the HPS wants DMA to be enabled
 	while (!(IORD_HW_REGS_STATUS() & HW_REGS_STATUS_DMA_ENABLED));
-	// "latch" the DMA destination
-	uint32_t dma_phys_addr = IORD_HW_REGS_DMA_PHYS_ADDR();
 
 	// record how many frames we've captured so we know where
 	// to store and retrieve them
 	uint32_t frame_counter = 0;
-	IOWR_HW_REGS_FRAME_COUNTER(0);
 
 	// wait for vblank to start so we are synchronized with frame
 	while (!(IORD_HW_REGS_STATUS() & HW_REGS_STATUS_VBLANK));
-	// capture until HPS wants DMA disabled
 	while (1) {
 		// tell the HPS that the DMA is enabled
 		IOWR_HW_REGS_CONTROL(
 			IORD_HW_REGS_CONTROL() | HW_REGS_CONTROL_DMA_ACTIVE);
-		// dma to the start of a new frame in physical memory
-		uint32_t curr_line_addr_dest = ((frame_counter & 0xF) << 18) +
-			dma_phys_addr;
+		// dma to the start of the next buffer
+		uint32_t curr_line_addr_dest = frame_addrs[frame_counter&0x1F];
 		// wait until the camera deasserts VBLANK and the frame is visible
 		while ((IORD_HW_REGS_STATUS() & HW_REGS_STATUS_VBLANK));
 		for (int line=0; line<(CAM_LINES_PER_FRAME); line++) {
