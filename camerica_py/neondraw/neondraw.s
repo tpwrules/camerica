@@ -88,3 +88,61 @@ merlin_row:
     
     bx lr
     
+.global nd_conv_photon_640
+
+// on entry
+// r0 - source pointer
+// r1 - dest pointer
+// r2 - offset
+// r3 - gain
+// q4-q7 are off limits
+nd_conv_photon_640:
+    // load offset into q14 so we can subtract from 8 pixels
+    VDUP.16 q14, r2
+    // and gain into d30 so we can multiply by 4 pixels
+    VDUP.16 d30, r3
+    // number of rows
+    ldr r2, =512
+    // number of bytes per row
+    ldr r12, =(640*4)
+    // leftover bytes in row
+    ldr r3, =(136*4)
+p640_loop:
+p640_row:
+    // load 8 pixels from source to q0
+    VLD1.16 {q0}, [r0]!
+    // subtract offset from them and saturate so they don't go below 0
+    VQSUB.U16 q1, q0, q14
+    // apply scale factor too
+    // widen into q2 and q3
+    VMULL.U16 q2, d2, d30
+    VMULL.U16 q3, d3, d30
+    // now shift >> 15 to put intensity in low 8 bits
+    // narrow to 16 bits and saturate too
+    VQSHRN.U32 d16, q2, #15
+    VQSHRN.U32 d17, q3, #15
+    // narrow the pixels back down to 8 bits
+    VQMOVN.U16 d24, q8
+    
+    // now we have to pack and write 8 pixels
+    // the group will be 24, 25, 26, 27
+    VMOV d25, d24
+    VMOV d26, d24
+    // we don't care what's in the alpha channel
+    VST4.8 {d24, d25, d26, d27}, [r1]!
+    
+    // written all the bytes for this row?
+    subs r12, r12, #32
+    bne p640_row
+    
+    // refill byte counter
+    ldr r12, =(640*4)
+    
+    // move output pointer to next row
+    add r1, r1, r3
+    
+    // and prepare for next iteration
+    subs r2, r2, #1
+    bne p640_loop
+    
+    bx lr

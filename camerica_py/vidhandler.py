@@ -131,7 +131,7 @@ class VidLiveHandler(VidHandler):
                 
 
 class VidRecordHandler(VidHandler):
-    def __init__(self, bufs, fname):
+    def __init__(self, camera, bufs, fname):
         # check that the hardware exists
         if not hw.is_hardware_present():
             raise ValueError("hardware missing")

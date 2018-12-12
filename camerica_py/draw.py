@@ -22,7 +22,10 @@ def get_drawer(camera):
         else:
             return MerlinDrawer
     elif isinstance(camera, cameras.Photon640Camera):
-        return Photon640Drawer
+        if neon_available:
+            return NEONPhoton640Drawer
+        else:
+            return Photon640Drawer
     else:
         raise Exception("huh?")
 
@@ -171,3 +174,21 @@ class Photon640Drawer(Drawer):
         np.clip(self.framebuf, 0, 255, out=self.frame_pix)
         # now blit it to the screen
         self.disp.blit(self.frame_surf, (0, 0))
+        
+class NEONPhoton640Drawer(Drawer):
+    def __init__(self, disp):
+        super().__init__(disp)
+        
+        # allocate a frame buffer the same size as the camera data
+        # the NEON routine handles all the transformations
+        self.framebuf = np.empty((512, 640), dtype=np.uint16)
+        
+    def draw_frame(self, offset, scale):
+        # call the NEON routine and let it do the magic
+        # we write directly into the display surface, so lock it first
+        self.disp.lock()
+        lib.nd_conv_photon_640(self.framebuf.ctypes.data, # source ptr
+            self.disp._pixels_address, # dest ptr
+            offset,
+            scale)
+        self.disp.unlock()
