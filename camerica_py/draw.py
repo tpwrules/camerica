@@ -3,6 +3,8 @@ import pygame
 import numpy as np
 import time
 
+import cameras
+
 neon_available = False
 try:
     from neondraw.neondraw import lib, ffi
@@ -12,28 +14,23 @@ except:
     pass
 
 def get_drawer(camera):
-    if camera == "merlin":
+    if not isinstance(camera, cameras.Camera):
+        raise ValueError("expected Camera, not {}".format(repr(camera)))
+    if isinstance(camera, cameras.MerlinCamera):
         if neon_available:
             return NEONMerlinDrawer
         else:
             return MerlinDrawer
     else:
-        raise ValueError("unrecognized camera '{}'".format(camera)) 
+        raise Exception("huh?")
 
 class Drawer:
-    def __init__(self, camera, disp):
+    def __init__(self, disp):
         self.disp = disp
         
         self.perftime = 0
         self.perftimes = 0
-        
-        self.camera = camera
-        if camera == "merlin":
-            self.width = 320
-            self.height = 256
-        else:
-            raise ValueError("unrecognized camera '{}'".format(camera))
-        
+
         # allocate array to hold histogram data
         self.histobuf = np.empty((1, 512), dtype=np.uint32)
         
@@ -83,7 +80,7 @@ class Drawer:
         
 class MerlinDrawer(Drawer):
     def __init__(self, disp):
-        super().__init__("merlin", disp)
+        super().__init__(disp)
         
         # allocate frame buffer with 32 bit pixels so we have
         # room to scale
@@ -93,10 +90,12 @@ class MerlinDrawer(Drawer):
         self.frame_pix = np.empty((256*2, 320*2), dtype=np.uint8)
         # and it as a surface so we can draw it to the screen
         palette = [(c, c, c) for c in range(256)]
-        self.frame_surf = pygame.image.frombuffer(self.frame_pix, (320*2, 256*2), "P")
+        self.frame_surf = pygame.image.frombuffer(
+            self.frame_pix, (320*2, 256*2), "P")
         self.frame_surf.set_palette(palette)
         
-    # stolen from stackoverflow https://stackoverflow.com/questions/7525214/how-to-scale-a-numpy-array
+    # stolen from stackoverflow 
+    # https://stackoverflow.com/questions/7525214/how-to-scale-a-numpy-array
     def scale(self, A, B, k): # fill A with B scaled by K
         Y = A.shape[0]
         X = A.shape[1]
@@ -123,7 +122,7 @@ class MerlinDrawer(Drawer):
         
 class NEONMerlinDrawer(Drawer):
     def __init__(self, disp):
-        super().__init__("merlin", disp)
+        super().__init__(disp)
         
         # allocate a frame buffer the same size as the camera data
         # the NEON routine handles all the transformations

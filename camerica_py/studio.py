@@ -4,6 +4,7 @@ import numpy as np
 
 import vidhandler
 from draw import get_drawer
+import cameras
 import widgets
 
 # launch the display and pygame stuff
@@ -14,12 +15,16 @@ clock = pygame.time.Clock()
 pygame.font.init()
 font = pygame.font.SysFont("", 24)
 
+# choose a camera to use
+camera = cameras.MerlinCamera()
+
 # construct the class to draw the image on screen
-drawer = get_drawer("merlin")(disp)
+drawer = get_drawer(camera)(disp)
 
 # construct buffers for the current displayed frame, to be written
 # by the handler
-framebuf_handler = np.empty((256, 320), dtype=np.uint16)
+framebuf_handler = np.empty(
+    (camera.height, camera.width), dtype=np.uint16)
 histobuf_handler = np.empty((1, 512), dtype=np.uint32)
 
 # save the buffers made by the drawer so we can copy into them
@@ -30,13 +35,13 @@ mode = sys.argv[1]
 
 handler = None
 if mode == "live":
-    handler = vidhandler.VidLiveHandler(320, 256, 60,
+    handler = vidhandler.VidLiveHandler(camera,
         (framebuf_handler, histobuf_handler))
 elif mode == "record":
-    handler = vidhandler.VidRecordHandler(320, 256, 60, 
+    handler = vidhandler.VidRecordHandler(camera, 
         (framebuf_handler, histobuf_handler), sys.argv[2])
 elif mode == "play":
-    handler = vidhandler.VidPlaybackHandler(320, 256, 60,
+    handler = vidhandler.VidPlaybackHandler(camera,
         (framebuf_handler, histobuf_handler), sys.argv[2])
         
 if handler is None:
@@ -80,10 +85,6 @@ try:
                 elif event.key == pygame.K_RIGHT and mode == "play":
                     if handler.vid_frame < handler.saved_frames-1:
                         handler.seek(handler.vid_frame+1)
-                elif event.key == pygame.K_c and mode != "play":
-                    t = handler.hw_regs.cam_type
-                    handler.hw_regs.cam_type = \
-                        vidhandler.hw.CameraType((t + 1) % 3)
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 pos = pygame.mouse.get_pos()
                 for widget in widget_list:

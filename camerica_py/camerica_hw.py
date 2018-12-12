@@ -186,8 +186,9 @@ class UDMABuf:
             
             
 class Framequeue:
-    def __init__(self, regs):
+    def __init__(self, regs, camera):
         self.regs = regs
+        self.camera = camera
         
         # construct 32 frame and histo buffers
         self.udmabufs = []
@@ -195,18 +196,22 @@ class Framequeue:
         self.histos = []
         for bi in range(32):
             udmabuf = UDMABuf("udmabuf{}".format(bi),
-                320*256*2, owned_by_cpu=False)
+                self.camera.width*self.camera.height*2,
+                owned_by_cpu=False)
             self.udmabufs.append(udmabuf)
             self.frames.append(np.memmap(udmabuf.mmap_path,
                 dtype=np.uint16, mode='r',
-                offset=0, shape=(256, 320)))
+                offset=0, shape=(self.camera.height, self.camera.width)))
             self.histos.append(np.memmap(udmabuf.mmap_path,
                 dtype=np.uint32, mode='r',
-                offset=320*256*2, shape=(512,)))
+                offset=self.camera.width*self.camera.height*2,
+                shape=(512,)))
                 
     def start(self):
         # make sure we're stopped
         self.stop()
+        # set the correct type of camera to connect the receiver
+        self.regs.cam_type = self.camera.hw_type
         # write the latest physical addrs to the hardware
         for ui, udmabuf in enumerate(self.udmabufs):
             # write this phys addr

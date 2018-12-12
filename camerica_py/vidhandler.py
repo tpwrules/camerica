@@ -7,13 +7,15 @@ import time
 from enum import Enum
 
 import camerica_hw as hw
+import cameras
 import vidfile
 
 class VidHandler:
-    def __init__(self, width, height, fps, bufs):
-        self.width = width
-        self.height = height
-        self.fps = fps
+    def __init__(self, camera, bufs):
+        if not isinstance(camera, cameras.Camera):
+            raise ValueError("expected Camera, not {}".format(repr(camera)))
+        
+        self.camera = camera
         self.framebuf, self.histobuf = bufs
         
         self.is_running = True
@@ -74,17 +76,17 @@ class VidHandler:
 
 # live display of the video, without any recording or playback
 class VidLiveHandler(VidHandler):
-    def __init__(self, width, height, fps, bufs):
+    def __init__(self, camera, bufs):
         # check that the hardware exists
         if not hw.is_hardware_present():
             raise ValueError("hardware missing")
             
-        super().__init__(width, height, fps, bufs)
+        super().__init__(camera, bufs)
         
         # instantiate the hardware and video buffer
         self.hw_regs = hw.Registers()
         # and the framebuffer attached to the hardware
-        self.fq = hw.Framequeue(self.hw_regs)
+        self.fq = hw.Framequeue(self.hw_regs, camera)
         
         # save also the current frame progress
         self.current_frame = 0
@@ -129,12 +131,12 @@ class VidLiveHandler(VidHandler):
                 
 
 class VidRecordHandler(VidHandler):
-    def __init__(self, width, height, fps, bufs, fname):
+    def __init__(self, bufs, fname):
         # check that the hardware exists
         if not hw.is_hardware_present():
             raise ValueError("hardware missing")
             
-        super().__init__(width, height, fps, bufs)
+        super().__init__(camera, bufs)
         
         # instantiate the hardware and video buffer
         self.hw_regs = hw.Registers()
@@ -148,7 +150,8 @@ class VidRecordHandler(VidHandler):
         self.saved_frames = 0
         
         # and create a vidfile to save the recording in
-        self.vf = vidfile.VidfileWriter(fname, width, height, fps)
+        self.vf = vidfile.VidfileWriter(fname, 
+            camera.width, camera.height, camera.fps)
         
         # now start up the handler thread
         self.handler_thread.start()
@@ -194,8 +197,8 @@ class VidRecordHandler(VidHandler):
             
 # only playback of video, no hardware
 class VidPlaybackHandler(VidHandler):
-    def __init__(self, width, height, fps, bufs, fname):
-        super().__init__(width, height, fps, bufs)
+    def __init__(self, camera, bufs, fname):
+        super().__init__(camera, bufs)
         
         self.playing = False
         
@@ -258,4 +261,4 @@ class VidPlaybackHandler(VidHandler):
                 if self.vid_frame == self.saved_frames-1:
                     self.playing = False
             
-            time.sleep(1/self.fps) # wait one frame time (needs to be fixed)
+            time.sleep(1/self.camera.fps) # wait one frame time (needs to be fixed)
