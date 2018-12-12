@@ -140,9 +140,8 @@ class VidRecordHandler(VidHandler):
         
         # instantiate the hardware and video buffer
         self.hw_regs = hw.Registers()
-        self.udmabuf = hw.UDMABuf("udmabuf0")
         # and the framebuffer attached to the hardware
-        self.fq = hw.Framequeue(self.udmabuf, self.hw_regs)
+        self.fq = hw.Framequeue(self.hw_regs, camera)
         
         # save also the current frame progress
         self.current_frame = 0
