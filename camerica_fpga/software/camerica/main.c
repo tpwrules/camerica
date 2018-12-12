@@ -9,9 +9,6 @@
 
 #include "altera_avalon_dma_regs.h"
 
-#define CAM_PIXELS_PER_LINE (320)
-#define CAM_LINES_PER_FRAME (256)
-
 #define HW_REGS_BASE (0x22000)
 
 #define HW_REGS_DMA_PHYS_ADDR (0)
@@ -25,6 +22,7 @@
 #define HW_REGS_STATUS_HBLANK (0x20)
 #define HW_REGS_STATUS_WHICH_HISTO (0x40)
 #define HW_REGS_STATUS_NEW_DMA_PHYS (0x80)
+#define HW_REGS_STATUS_CAM_TYPE (0xF00)
 
 #define HW_REGS_CONTROL (3)
 #define HW_REGS_CONTROL_DMA_ACTIVE (2)
@@ -90,6 +88,26 @@ int main() {
 	// now wait until the HPS wants DMA to be enabled
 	while (!(IORD_HW_REGS_STATUS() & HW_REGS_STATUS_DMA_ENABLED));
 
+	// set up camera parameters based on type
+	uint32_t cam_type = (IORD_HW_REGS_STATUS() & HW_REGS_STATUS_CAM_TYPE) >> 8;
+	uint32_t bytes_per_line;
+	uint32_t lines_per_frame;
+	switch (cam_type) {
+	case 1: // merlin
+		bytes_per_line = 320*2;
+		lines_per_frame = 256;
+		break;
+	case 2: // photon 640
+		bytes_per_line = 640*2;
+		lines_per_frame = 512;
+		break;
+	default:
+		// enough to avoid upsetting the DMA engine
+		bytes_per_line = 32;
+		lines_per_frame = 1;
+		break;
+	}
+
 	// record how many frames we've captured so we know where
 	// to store and retrieve them
 	uint32_t frame_counter = 0;
@@ -104,7 +122,7 @@ int main() {
 		uint32_t curr_line_addr_dest = frame_addrs[frame_counter&0x1F];
 		// wait until the camera deasserts VBLANK and the frame is visible
 		while ((IORD_HW_REGS_STATUS() & HW_REGS_STATUS_VBLANK));
-		for (int line=0; line<(CAM_LINES_PER_FRAME); line++) {
+		for (int line=0; line<lines_per_frame; line++) {
 			// configure the DMA controller while the line is happening
 			// dma from the line that's currently being filled
 			IOWR_ALTERA_AVALON_DMA_RADDRESS(VID_DMA_BASE,
@@ -117,9 +135,9 @@ int main() {
 			while (!(IORD_HW_REGS_STATUS() & HW_REGS_STATUS_HBLANK));
 			// and write the length so the DMA controller starts working
 			IOWR_ALTERA_AVALON_DMA_LENGTH(VID_DMA_BASE,
-				CAM_PIXELS_PER_LINE*2);
+				bytes_per_line);
 			DMA_ON();
-			curr_line_addr_dest += CAM_PIXELS_PER_LINE*2;
+			curr_line_addr_dest += bytes_per_line;
 			// wait for the DMA controller to be finished
 			while ((IORD_ALTERA_AVALON_DMA_STATUS(VID_DMA_BASE) &
 				ALTERA_AVALON_DMA_STATUS_BUSY_MSK));

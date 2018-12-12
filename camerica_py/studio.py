@@ -16,7 +16,7 @@ pygame.font.init()
 font = pygame.font.SysFont("", 24)
 
 # choose a camera to use
-camera = cameras.MerlinCamera()
+camera = cameras.Photon640Camera()
 
 # construct the class to draw the image on screen
 drawer = get_drawer(camera)(disp)

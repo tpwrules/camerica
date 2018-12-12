@@ -21,6 +21,8 @@ def get_drawer(camera):
             return NEONMerlinDrawer
         else:
             return MerlinDrawer
+    elif isinstance(camera, cameras.Photon640Camera):
+        return Photon640Drawer
     else:
         raise Exception("huh?")
 
@@ -137,4 +139,35 @@ class NEONMerlinDrawer(Drawer):
             offset,
             scale)
         self.disp.unlock()
-            
+
+class Photon640Drawer(Drawer):
+    def __init__(self, disp):
+        super().__init__(disp)
+        
+        # allocate frame buffer with 32 bit pixels so we have
+        # room to scale
+        self.framebuf = np.empty((512, 640), dtype=np.int32)
+        
+        # allocate pixel data for the image
+        self.frame_pix = np.empty((512, 640), dtype=np.uint8)
+        # and it as a surface so we can draw it to the screen
+        palette = [(c, c, c) for c in range(256)]
+        self.frame_surf = pygame.image.frombuffer(
+            self.frame_pix, (640, 512), "P")
+        self.frame_surf.set_palette(palette)
+        
+    def draw_frame(self, offset, scale):
+        # it's safe to modify the pixel buffer, so
+        # let's do our operations in place
+        
+        # shift pixels to desired offset
+        self.framebuf -= offset
+        # and scale them too
+        self.framebuf *= scale
+        # remove low 8 bits of pixel + 7 bit extra scale
+        self.framebuf >>= 15
+        # and clamp to an 8 bit display pixel,
+        # then write it to the 8 bit display
+        np.clip(self.framebuf, 0, 255, out=self.frame_pix)
+        # now blit it to the screen
+        self.disp.blit(self.frame_surf, (0, 0))
