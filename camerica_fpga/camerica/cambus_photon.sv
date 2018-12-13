@@ -96,7 +96,7 @@ module cambus_photon (
     
     // automatically read pixels as they become ready
     assign fifo_rdreq = !fifo_rdempty;
-        always @(posedge clk) begin
+    always @(posedge clk) begin
         // pixel is ready the cycle after fifo_rdreq is asserted
         vid_pixsync <= fifo_rdreq;
     end
@@ -108,10 +108,37 @@ module cambus_photon (
     
     assign {vid_hsync, vid_vsync, vid_cam_pixel} = fifo_out;
     
-    // we still need to retime in the vid domain
-    assign vid_hblank = !vid_hsync;
-    assign vid_vblank = vid_vsync;
+    assign vid_hblank = !vid_hsync; // this is straightforward from the camera
+    // but the pixel needs to be delayed one cycle
+    always @(posedge clk) begin
+        if (vid_pixsync) begin
+            vid_pixel <= vid_cam_pixel;
+        end
+    end
     
-    assign vid_pixel = vid_cam_pixel;
-    
+    // the camera only outputs vid_vsync for 4 cycles
+    // randomly in the middle of the blank time
+    // we need to widen it to ensure the rest of the logic
+    // (in particular the nios) can catch the rising edge and have time to do
+    // vblank processing
+    // even though it's not timed correctly relative to hblank or the frame,
+    // hblank will stop pixels from being written during vblank, cause it's
+    // active the whole time
+    logic [10:0] vblank_timer;
+    always @(posedge clk) begin
+        if (vid_pixsync) begin
+            if (vid_vsync) begin
+                // start timer for about 2000 cycles
+                vblank_timer <= 11'd2047;
+                // and assert vblank
+                vid_vblank <= 1'b1;
+            end else if (vblank_timer != 11'd0) begin
+                // decrement the timer and stay in vblank
+                vblank_timer <= vblank_timer - 1'd1;
+            end else begin
+                // we're not in vblank once the timer expires
+                vid_vblank <= 1'b0;
+            end
+        end
+    end
 endmodule

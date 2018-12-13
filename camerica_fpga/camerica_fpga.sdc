@@ -18,9 +18,11 @@ set_input_delay -clock altera_reserved_tck -clock_fall 3 [get_ports altera_reser
 set_output_delay -clock altera_reserved_tck 3 [get_ports altera_reserved_tdo]
 
 
-# camera input clock
+# merlin camera input clock
 # nominally 6.25MHz
-create_clock -name cambus_clk -period "6.25 MHz" [get_ports GPIO[29]]
+create_clock -name cambus_merlin_clk -period "6.25 MHz" [get_ports GPIO[29]]
+# and the photon 640
+create_clock -name cambus_photon_640_clk -period "73.636 MHz" [get_ports GPIO[15]]
 
 #**************************************************************
 # Create Generated Clock
