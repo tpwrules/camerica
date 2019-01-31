@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<instance entity-name="altera_pll" version="16.1" >
+<instance entity-name="altera_pll" version="18.0" >
 <generic name="debug_print_output" value="false" />
 <generic name="debug_use_rbc_taf_method" value="false" />
 <generic name="device_family" value="Cyclone V" />
