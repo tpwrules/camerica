@@ -5,9 +5,6 @@ cd /root/camerica
 # shutdown as much as possible
 repo/camerica_linux/sysdown.sh > /dev/null 2>&1
 
-# install fuse driver
-insmod ko/fuse.ko > /dev/null 2>&1
-
 set -e
 
 # now do udmabuf driver with 32 max-frame-sized buffers
