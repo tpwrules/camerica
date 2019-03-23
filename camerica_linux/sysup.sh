@@ -3,7 +3,7 @@
 cd /root/camerica
 
 # shutdown as much as possible
-repo/camerica_linux/sysdown > /dev/null 2>&1
+repo/camerica_linux/sysdown.sh > /dev/null 2>&1
 
 # install fuse driver
 insmod ko/fuse.ko > /dev/null 2>&1
