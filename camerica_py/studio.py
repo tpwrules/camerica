@@ -178,11 +178,13 @@ try:
                 elif event.key == pygame.K_i:
                     set_mode(camera, "idle")
             elif event.type == pygame.MOUSEBUTTONDOWN:
+                if event.button != 1: continue
                 pos = pygame.mouse.get_pos()
                 for widget in widget_list:
                     widget.mouseclick(True,
                         (pos[0]-widget.rect.left, pos[1]-widget.rect.top))
             elif event.type == pygame.MOUSEBUTTONUP:
+                if event.button != 1: continue
                 pos = pygame.mouse.get_pos()
                 for widget in widget_list:
                     widget.mouseclick(False,
