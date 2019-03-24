@@ -39,6 +39,12 @@ def set_mode(new_camera, mode, filename=None):
     drawer = None
     camera = None
     
+    if not have_hardware:
+        new_camera = None
+    
+    if not have_hardware and mode != "play":
+        mode = "idle"
+    
     if new_camera is not None:
         camera = new_camera
     else:
