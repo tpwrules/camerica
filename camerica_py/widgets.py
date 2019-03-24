@@ -140,27 +140,39 @@ class ButtonWidget(Widget):
         
         self.font = font
         self.surf = pygame.Surface(self.rect.size, 0, disp)
+        self.clicked = False
+        self.enabled = True
         self.set_text(text)
         
     def mouseclick(self, down, pos):
         if down and self.is_self_hit(pos):
-            print("clicked!!")
+            self.clicked = True
     
     def mousemove(self, pos):
         pass
     
     def set_text(self, text):
         self.text = text
-        s = self.font.render(self.text, True, (255, 255, 255),
-            (120, 120, 120))
+        if self.enabled:
+            s = self.font.render(self.text, True, (255, 255, 255),
+                (120, 120, 120))
+        else:
+            s = self.font.render(self.text, True, (180, 180, 180),
+                (70, 70, 70))
         self.text_surf = s
         self.text_pos = ((self.self_rect.width-s.get_width())//2,
             (self.self_rect.height-s.get_height())//2)
         self.dirty = True
-        self.draw()
+    
+    def set_enabled(self, enabled):
+        if self.enabled is not enabled:
+            self.dirty = True
+            self.enabled = enabled
+            self.set_text(self.text)
+        self.clicked = False
         
     def draw(self):
-        if self.dirty:
+        if self.dirty and self.enabled:
             surf = self.surf
             rect = self.self_rect
             surf.fill((120, 120, 120))
@@ -171,6 +183,20 @@ class ButtonWidget(Widget):
             pygame.draw.rect(surf, (75, 75, 75),
                 (rect.left, rect.bottom-2, rect.width, 2))
             pygame.draw.rect(surf, (75, 75, 75),
+                (rect.right-2, rect.top, 2, rect.height))
+            surf.blit(self.text_surf, self.text_pos)
+            self.dirty = False
+        elif self.dirty and not self.enabled:
+            surf = self.surf
+            rect = self.self_rect
+            surf.fill((70, 70, 70))
+            pygame.draw.rect(surf, (150, 150, 150),
+                (rect.left, rect.top, rect.width, 2))
+            pygame.draw.rect(surf, (150, 150, 150),
+                (rect.left, rect.top, 2, rect.height))
+            pygame.draw.rect(surf, (50, 50, 50),
+                (rect.left, rect.bottom-2, rect.width, 2))
+            pygame.draw.rect(surf, (50, 50, 50),
                 (rect.right-2, rect.top, 2, rect.height))
             surf.blit(self.text_surf, self.text_pos)
             self.dirty = False

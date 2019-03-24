@@ -137,6 +137,7 @@ mode_record_widget = \
     widgets.ButtonWidget(disp, (640+8, 470), 50, button_font, "Record")
 mode_play_widget = \
     widgets.ButtonWidget(disp, (640+8+(136/2), 470), 50, button_font, "Play")
+mode_play_widget.set_enabled(False)
 mode_camera_widget = \
     widgets.ButtonWidget(disp, (640+8, 380), 100, button_font, "Select Camera")
 widget_list = [histo_widget, seekbar_widget,
