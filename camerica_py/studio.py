@@ -11,6 +11,7 @@ pygame.display.update()
 
 import numpy as np
 import tkinter
+from tkinter.filedialog import askopenfilename, asksaveasfilename
 
 import vidhandler
 from draw import get_drawer
@@ -37,7 +38,13 @@ def set_mode(new_camera, mode, filename=None):
     drawer = None
     camera = None
     
-    camera = new_camera
+    if new_camera is not None:
+        camera = new_camera
+    else:
+        camera = cameras.NoCamera()
+    
+    if isinstance(camera, cameras.NoCamera):
+        mode = "none"
     if mode != "none":
         drawer = get_drawer(camera)(disp)
         framebuf_handler = np.zeros(
@@ -58,7 +65,7 @@ def set_mode(new_camera, mode, filename=None):
         framebuf_handler = None
         histobuf_handler = None
         disp.fill((0, 0, 255), (0, 0, 640, 512))
-        
+
     sys_mode = mode
 
 def select_camera():
@@ -66,7 +73,7 @@ def select_camera():
         "Select the attached camera hardware",
         (cam.name for cam in cameras.cam_list))
     if camera_idx is None:
-        return cameras.NoCamera
+        return None
     return cameras.cam_list[camera_idx]
 
 clock = pygame.time.Clock()
@@ -86,9 +93,9 @@ set_mode(None, "none")
 # but we do want to switch to live mode if there is hardware
 # so the user has something to see
 if have_hardware:
-    camera = select_camera()
-    if camera is not cameras.NoCamera:
-        set_mode(camera(), "live")
+    new_camera = select_camera()
+    if new_camera is not cameras.NoCamera:
+        set_mode(new_camera(), "live")
 
 frames = 0
            
@@ -128,16 +135,34 @@ try:
                 elif event.key == pygame.K_RIGHT and sys_mode == "play":
                     if handler.vid_frame < handler.saved_frames-1:
                         handler.seek(handler.vid_frame+1)
-                elif event.key == pygame.K_l and sys_mode == "none":
-                    camera_idx = tkwidgets.asklist("Hardware Setup",
-                        "Select the attached camera hardware",
-                        (cam.name for cam in cameras.cam_list))
-                    camera = cameras.cam_list[camera_idx]
-                    if camera is cameras.NoCamera:
+                elif event.key == pygame.K_c and \
+                        (sys_mode == "live" or sys_mode == "none"):
+                    if not have_hardware:
                         continue
-                    set_mode(camera(), "live")
-                elif event.key == pygame.K_o and sys_mode == "live":
-                    set_mode(None, "none")
+                    # change attached camera. only meaningful while live
+                    new_camera = select_camera()
+                    if new_camera is not None:
+                        set_mode(new_camera(), "live")
+                elif event.key == pygame.K_l and sys_mode != "live":
+                    # switch to live mode
+                    # ignore if no hardware
+                    if not have_hardware:
+                        continue
+                    set_mode(camera, "live")
+                elif event.key == pygame.K_r and sys_mode == "live":
+                    # switch to recording mode
+                    fname = asksaveasfilename(
+                        filetypes=(("Camerica Videos", "*.vid"),))
+                    if len(fname) == 0:
+                        continue
+                    set_mode(camera, "record", fname)
+                elif event.key == pygame.K_p and \
+                        (sys_mode == "live" or sys_mode == "none"):
+                    fname = askopenfilename(
+                        filetypes=(("Camerica Videos", "*.vid"),))
+                    if len(fname) == 0:
+                        continue
+                    set_mode(camera, "play", fname)
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 pos = pygame.mouse.get_pos()
                 for widget in widget_list:
