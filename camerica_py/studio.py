@@ -157,11 +157,14 @@ mode_play_widget = \
 
 mode_camera_widget = \
     widgets.ButtonWidget(disp, (640+8, 380), 100, button_font, "Select Camera")
+    
+histo_span_widget = \
+    widgets.ButtonWidget(disp, (640+8+10, 540), 100, button_font, "Auto Span")
 
 widget_list = [histo_widget, seekbar_widget,
     mode_idle_widget, mode_live_widget,
     mode_record_widget, mode_play_widget,
-    mode_camera_widget]
+    mode_camera_widget, histo_span_widget]
     
 # start with no handler or camera by default
 handler = None
@@ -185,6 +188,10 @@ next_mode = ""
 splash_time = time.monotonic() - splash_start
 if splash_time < 5:
     time.sleep(5-splash_time)
+    
+histo_auto_span = True
+histo_auto_min = 0
+histo_auto_max = 512
 
 try:
     while True:
@@ -278,6 +285,19 @@ try:
                     set_mode(new_camera(), sys_mode)
             
         next_mode = ""
+        
+        if histo_widget.new_bins and histo_auto_span:
+            histo_span_widget.set_text("Manual Span")
+            histo_span_widget.clicked = False
+            histo_auto_span = False
+            histo_widget.new_bins = False
+        
+        if histo_span_widget.clicked:
+            histo_widget.new_bins = False
+            histo_auto_span = not histo_auto_span
+            histo_span_widget.set_text(
+                "Auto Span" if histo_auto_span else "Manual Span")
+            histo_span_widget.clicked = False
             
         # copy the current video frame to the buffer
         # under a lock, so we don't tear it
@@ -286,6 +306,25 @@ try:
             np.copyto(drawer.framebuf, framebuf_handler)
             np.copyto(drawer.histobuf, histobuf_handler)
             handler.unlock_frame()
+            
+            # calculate auto histo targets
+            if frames % 5 == 0:
+                hb = drawer.histobuf
+                bin_int = np.cumsum(hb)*1000/(camera.width*camera.height)
+                histo_auto_min = 0
+                histo_auto_max = 512
+                # search for the bin with 0.1% and the bin with 99.9% of pixels
+                for bi, bin in enumerate(bin_int):
+                    if bin >= 1 and histo_auto_min == 0:
+                        histo_auto_min = bi
+                    if bin >= 999 and histo_auto_max == 512:
+                        histo_auto_max = bi
+            
+                if histo_auto_span:
+                    histo_widget.min_bin = histo_auto_min
+                    histo_widget.max_bin = histo_auto_max
+                    histo_widget.drag_min_bin = histo_auto_min
+                    histo_widget.drag_max_bin = histo_auto_max
         
             # and use the drawer to make it show on the screen
             drawer.draw(histo_widget.min_bin, histo_widget.max_bin)

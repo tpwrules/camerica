@@ -24,6 +24,7 @@ class HistoWidget(Widget):
         
         self.mouse_clicked = False
         self.click_pos = None
+        self.new_bins = False
         
         self.sizer_cursor = pygame.cursors.compile(
             pygame.cursors.sizer_x_strings)
@@ -34,6 +35,8 @@ class HistoWidget(Widget):
         elif down:
             obj = self.get_hover_obj(pos)
             if obj != "none":
+                # not quite true, but the goal is to kick into manual span mode
+                self.new_bins = True
                 self.mouse_clicked = True
                 self.click_pos = pos
                 # determine which part of the histogram was clicked on
