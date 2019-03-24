@@ -169,11 +169,10 @@ class Registers:
         self.control = (self.control & 0xFFFFF0FF) | (value.value << 8)
             
 class UDMABuf:
-    def __init__(self, name, expected_size, owned_by_cpu):
+    def __init__(self, name, expected_size):
         self.name = name
         self.path = "/sys/class/udmabuf/{}/".format(name)
         self.mmap_path = "/dev/{}".format(name)
-        self.owned_by_cpu = owned_by_cpu
         
         # test to see if the device exists
         if not os.path.isdir(self.path):
@@ -196,12 +195,8 @@ class UDMABuf:
         self._echo("sync_offset", str(0))
         self._echo("sync_size", str(size))
         
-        if self.owned_by_cpu:
-            # the cpu is the one writing to this buffer
-            self._echo("sync_direction", str(1))
-        else:
-            # the device is the one writing to the buffer
-            self._echo("sync_direction", str(2))
+        # the device is the one writing to the buffer
+        self._echo("sync_direction", str(2))
         
     def _cat(self, fn):
         path = os.path.join(self.path, fn)
@@ -215,11 +210,8 @@ class UDMABuf:
         
     def flush_cache(self):
         # claim ownership of the buffer to force the
-        # CPU cache to be cleared or flushed
-        if self.owned_by_cpu:
-            self._echo("sync_for_device", str(1))
-        else:
-            self._echo("sync_for_cpu", str(1))
+        # CPU cache to be discarded
+        self._echo("sync_for_cpu", str(1))
             
             
 class Framequeue:
@@ -235,8 +227,7 @@ class Framequeue:
         self.copybufs = []
         for bi in range(32):
             udmabuf = UDMABuf("udmabuf{}".format(bi),
-                self.camera.width*self.camera.height*2,
-                owned_by_cpu=False)
+                self.camera.width*self.camera.height*2)
             self.udmabufs.append(udmabuf)
             self.frames.append(np.memmap(udmabuf.mmap_path,
                 dtype=np.uint16, mode='r',
