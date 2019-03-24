@@ -8,18 +8,22 @@ import queue
 import numpy as np
 import random
 
+import cameras
+
 MAX_FILE_SIZE = 3*1024*1024*1024
-HEADER_SIZE = 8 + 5*4
+HEADER_SIZE = 8 + 6*4
 
 class VidfileWriter:
-    def __init__(self, path, width, height, fps):
+    def __init__(self, path, camera):
         self.path = path
-        self.width = width
-        self.height = height
-        self.fps = fps
+        self.width = camera.width
+        self.height = camera.height
+        self.fps = camera.fps
+        self.cam_id = camera.hw_type
+        
         # pixels * 2bytespp + (512 histo entries+1 dropped frame count)
         # * 4 bytes per * fps + 4 byte frames this second
-        bytes_per_second = (width*self.height*2+513*4)*fps + 4
+        bytes_per_second = (self.width*self.height*2+513*4)*self.fps + 4
         self.seconds_per_file = \
             int((MAX_FILE_SIZE-HEADER_SIZE)/bytes_per_second)
         # random id so that files probably won't get crosslinked
@@ -164,11 +168,12 @@ class VidfileWriter:
             
         # open video file and write metadata to it
         self.vf_curr_file = open(name, "wb")
-        self.vf_curr_file.write(struct.pack("<Q5I",
+        self.vf_curr_file.write(struct.pack("<Q6I",
             self.file_id,
             self.width,
             self.height,
             self.fps,
+            self.cam_id,
             self.seconds_per_file,
             self.vf_curr_file_num))
 
@@ -181,15 +186,19 @@ class VidfileReader:
         
         # open the first vidfile so we can extract its metadata
         self.vf_curr_file = open(self.path, "rb")
-        meta = struct.unpack("<Q5I", self.vf_curr_file.read(HEADER_SIZE))
+        meta = struct.unpack("<Q6I", self.vf_curr_file.read(HEADER_SIZE))
         self.file_id = meta[0]
         self.width = meta[1]
         self.height = meta[2]
         self.fps = meta[3]
-        self.seconds_per_file = meta[4]
-        self.vf_curr_file_num = meta[5]
+        self.cam_id = meta[4]
+        self.seconds_per_file = meta[5]
+        self.vf_curr_file_num = meta[6]
         if self.vf_curr_file_num != 0:
             raise ValueError("first vidfile should be numbered 0")
+        if self.cam_id == 0 or self.cam_id >= len(cameras.cam_list):
+            raise ValueError(
+                "vidfile camera ID {} is invalid".format(self.cam_id))
             
         bytes_per_second = (self.width*self.height*2+513*4)*self.fps + 4
             
@@ -210,10 +219,10 @@ class VidfileReader:
                 break
             if was_last_file:
                 raise ValueError("vidfile {} is unexpected".format(name))
-            meta = struct.unpack("<Q5I", f.read(HEADER_SIZE))
+            meta = struct.unpack("<Q6I", f.read(HEADER_SIZE))
             if meta[0] != self.file_id:
                 raise ValueError("vidfile {} has incorrect ID".format(name))
-            if meta[5] != fnum:
+            if meta[6] != fnum:
                 raise ValueError("vidfile {} has incorrect number".format(name))
             seconds_in_file = int((os.path.getsize(name)-HEADER_SIZE)/bytes_per_second)
             if (os.path.getsize(name)-HEADER_SIZE)%bytes_per_second != 0:

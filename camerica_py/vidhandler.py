@@ -11,12 +11,16 @@ import cameras
 import vidfile
 
 class VidHandler:
-    def __init__(self, camera, bufs):
+    def __init__(self, camera):
         if not isinstance(camera, cameras.Camera):
             raise ValueError("expected Camera, not {}".format(repr(camera)))
         
         self.camera = camera
-        self.framebuf, self.histobuf = bufs
+        self.framebuf = np.zeros(
+            (camera.height, camera.width), dtype=np.uint16)
+        self.histobuf = np.zeros((1, 512), dtype=np.uint32)
+        # prevent divide by 0
+        self.histobuf[0] = 10
         
         self.is_running = True
         
@@ -76,8 +80,8 @@ class VidHandler:
 
 # live display of the video, without any recording or playback
 class VidLiveHandler(VidHandler):
-    def __init__(self, camera, bufs):
-        super().__init__(camera, bufs)
+    def __init__(self, camera):
+        super().__init__(camera)
         
         # instantiate the hardware and video buffer
         self.hw_regs = hw.Registers()
@@ -127,8 +131,8 @@ class VidLiveHandler(VidHandler):
                 
 
 class VidRecordHandler(VidHandler):
-    def __init__(self, camera, bufs, fname):
-        super().__init__(camera, bufs)
+    def __init__(self, camera, fname):
+        super().__init__(camera)
         
         # instantiate the hardware and video buffer
         self.hw_regs = hw.Registers()
@@ -141,8 +145,7 @@ class VidRecordHandler(VidHandler):
         self.saved_frames = 0
         
         # and create a vidfile to save the recording in
-        self.vf = vidfile.VidfileWriter(fname, 
-            camera.width, camera.height, camera.fps)
+        self.vf = vidfile.VidfileWriter(fname, camera)
         
         # now start up the handler thread
         self.handler_thread.start()
@@ -188,18 +191,20 @@ class VidRecordHandler(VidHandler):
             
 # only playback of video, no hardware
 class VidPlaybackHandler(VidHandler):
-    def __init__(self, camera, bufs, fname):
-        super().__init__(camera, bufs)
-        
+    def __init__(self, fname):
         self.playing = False
         
         # create the vidfile that the recording comes from
         self.vf = vidfile.VidfileReader(fname)
         
+        self.camera = cameras.cam_list[self.vf.cam_id]()
         self.vid_frame = 0
         self.current_frame = 0
         self.dropped_frames = 0
         self.saved_frames = self.vf.saved_frames
+        
+        # init here once we know the camera
+        super().__init__(self.camera)
         
         # now start up the handler thread
         self.handler_thread.start()

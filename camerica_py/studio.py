@@ -43,28 +43,25 @@ def set_mode(new_camera, mode, filename=None):
     else:
         camera = cameras.NoCamera()
     
-    if isinstance(camera, cameras.NoCamera):
+    if isinstance(camera, cameras.NoCamera) and mode != "play":
         mode = "none"
-    if mode != "none":
-        drawer = get_drawer(camera)(disp)
-        framebuf_handler = np.zeros(
-            (camera.height, camera.width), dtype=np.uint16)
-        histobuf_handler = np.zeros((1, 512), dtype=np.uint32)
-        # prevent divide by 0
-        histobuf_handler[0] = 10
+        
     if mode == "live":
-        handler = vidhandler.VidLiveHandler(camera,
-            (framebuf_handler, histobuf_handler))
+        handler = vidhandler.VidLiveHandler(camera)
     elif mode == "record":
-        handler = vidhandler.VidRecordHandler(camera,
-            (framebuf_handler, histobuf_handler), filename)
+        handler = vidhandler.VidRecordHandler(camera, filename)
     elif mode == "play":
-        handler = vidhandler.VidPlaybackHandler(camera,
-            (framebuf_handler, histobuf_handler), filename)
+        handler = vidhandler.VidPlaybackHandler(filename)
+        camera = handler.camera
     else:
         framebuf_handler = None
         histobuf_handler = None
         disp.fill((0, 0, 255), (0, 0, 640, 512))
+    
+    if mode != "none":
+        drawer = get_drawer(camera)(disp)
+        framebuf_handler = handler.framebuf
+        histobuf_handler = handler.histobuf
 
     sys_mode = mode
 
@@ -94,7 +91,7 @@ set_mode(None, "none")
 # so the user has something to see
 if have_hardware:
     new_camera = select_camera()
-    if new_camera is not cameras.NoCamera:
+    if new_camera is not cameras.NoCamera and new_camera is not None:
         set_mode(new_camera(), "live")
 
 frames = 0
