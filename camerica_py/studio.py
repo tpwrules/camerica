@@ -259,13 +259,15 @@ try:
             if sys_mode == "live":
                 fname = asksaveasfilename(
                     filetypes=(("Camerica Video", "*.vid"),))
-                set_mode(camera, "record", fname)
+                if len(fname) > 0: # make sure user gave a filename
+                    set_mode(camera, "record", fname)
         elif next_mode == "play":
             # we can play if it doesn't interrupt a recording
             if sys_mode != "record":
                 fname = askopenfilename(
                     filetypes=(("Camerica Video", "*.vid"),))
-                set_mode(camera, "play", fname)
+                if len(fname) > 0: # make sure user gave a filename
+                    set_mode(camera, "play", fname)
         elif next_mode == "select_camera":
             # can only select camera if there's the possibility
             # of a camera being attached
