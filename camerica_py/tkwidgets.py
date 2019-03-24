@@ -12,6 +12,8 @@ class _QueryList(simpledialog.Dialog):
         self.prompt = prompt
         self.choices = choices
         self.selected = selected
+        
+        self.cancelled = True
 
         simpledialog.Dialog.__init__(self, tkinter._default_root, title)
 
@@ -38,6 +40,17 @@ class _QueryList(simpledialog.Dialog):
         self.selected = self.entry.index(ACTIVE)
 
         return 1
+        
+    def cancel(self, event=None):
+        if self.cancelled:
+            self.selected = None
+            self.withdraw()
+            self.update_idletasks()
+            
+        super().cancel(event)
+    
+    def apply(self):
+        self.cancelled = False
         
 def asklist(title, prompt, choices, selected=None):
     d = _QueryList(title, prompt, choices, selected)

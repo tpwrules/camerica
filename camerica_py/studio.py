@@ -65,6 +65,8 @@ def select_camera():
     camera_idx = tkwidgets.asklist("Hardware Setup",
         "Select the attached camera hardware",
         (cam.name for cam in cameras.cam_list))
+    if camera_idx is None:
+        return cameras.NoCamera
     return cameras.cam_list[camera_idx]
 
 clock = pygame.time.Clock()
