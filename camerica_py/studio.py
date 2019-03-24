@@ -44,7 +44,7 @@ def set_mode(new_camera, mode, filename=None):
         camera = cameras.NoCamera()
     
     if isinstance(camera, cameras.NoCamera) and mode != "play":
-        mode = "none"
+        mode = "idle"
         
     # preserve FPS
     statuses = statuses[:2]
@@ -79,12 +79,13 @@ def set_mode(new_camera, mode, filename=None):
         framebuf_handler = None
         histobuf_handler = None
         disp.fill((0, 0, 255), (0, 0, 640, 512))
+        disp.fill((0, 0, 0), ((640-512)/2, 512+8, 512, 64))
         statuses.extend([
             "Mode: "+mode, camera.name,
         ])
         
     
-    if mode != "none":
+    if mode != "idle":
         drawer = get_drawer(camera)(disp)
         framebuf_handler = handler.framebuf
         histobuf_handler = handler.histobuf
@@ -92,9 +93,11 @@ def set_mode(new_camera, mode, filename=None):
     sys_mode = mode
 
 def select_camera():
+    global camera
     camera_idx = tkwidgets.asklist("Hardware Setup",
         "Select the attached camera hardware",
-        (cam.name for cam in cameras.cam_list))
+        (cam.name for cam in cameras.cam_list),
+        0 if camera is None else camera.hw_type.value)
     if camera_idx is None:
         return None
     return cameras.cam_list[camera_idx]
@@ -112,7 +115,7 @@ statuses = ["Display FPS", ""]
 
 # start with no handler or camera by default
 handler = None
-set_mode(None, "none")
+set_mode(None, "idle")
 
 # but we do want to switch to live mode if there is hardware
 # so the user has something to see
@@ -143,13 +146,13 @@ try:
                     if handler.vid_frame < handler.saved_frames-1:
                         handler.seek(handler.vid_frame+1)
                 elif event.key == pygame.K_c and \
-                        (sys_mode == "live" or sys_mode == "none"):
+                        (sys_mode == "live" or sys_mode == "idle"):
                     if not have_hardware:
                         continue
                     # change attached camera. only meaningful while live
                     new_camera = select_camera()
                     if new_camera is not None:
-                        set_mode(new_camera(), "live")
+                        set_mode(new_camera(), sys_mode)
                 elif event.key == pygame.K_l and sys_mode != "live":
                     # switch to live mode
                     # ignore if no hardware
@@ -164,12 +167,14 @@ try:
                         continue
                     set_mode(camera, "record", fname)
                 elif event.key == pygame.K_p and \
-                        (sys_mode == "live" or sys_mode == "none"):
+                        (sys_mode == "live" or sys_mode == "idle"):
                     fname = askopenfilename(
                         filetypes=(("Camerica Videos", "*.vid"),))
                     if len(fname) == 0:
                         continue
                     set_mode(camera, "play", fname)
+                elif event.key == pygame.K_i:
+                    set_mode(camera, "idle")
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 pos = pygame.mouse.get_pos()
                 for widget in widget_list:
@@ -218,7 +223,7 @@ try:
             entries = 10-handler.vf.vf_bufs_to_read.qsize()
             statuses[11] = "{}%".format(int(entries*100/10))
             
-        if sys_mode != "none":
+        if sys_mode != "idle":
             # current number of frames
             statuses[5] = str(handler.current_frame+1)
             # number of frames dropped so far

@@ -14,7 +14,7 @@ class Camera:
     hw_type = CameraType.NONE
     
 class NoCamera(Camera):
-    name = "None"
+    name = "No Camera"
     
 class MerlinCamera(Camera):
     name = "Merlin InSb"
