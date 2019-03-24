@@ -50,7 +50,7 @@ def set_mode(new_camera, mode, filename=None):
         new_camera = None
     
     if not have_hardware and mode != "play":
-        mode = "idle"
+        mode = "stop"
     
     if new_camera is not None:
         camera = new_camera
@@ -58,7 +58,7 @@ def set_mode(new_camera, mode, filename=None):
         camera = cameras.NoCamera()
     
     if isinstance(camera, cameras.NoCamera) and mode != "play":
-        mode = "idle"
+        mode = "stop"
         
     # preserve FPS
     statuses = statuses[:2]
@@ -93,7 +93,7 @@ def set_mode(new_camera, mode, filename=None):
         disp.fill((0, 0, 0), ((640-512)/2, 512+8, 512, 64))
         
     
-    if mode != "idle":
+    if mode != "stop":
         drawer = get_drawer(camera)(disp)
         framebuf_handler = handler.framebuf
         histobuf_handler = handler.histobuf
@@ -103,7 +103,7 @@ def set_mode(new_camera, mode, filename=None):
     curr_mode_text = button_font.render("Current mode: "+mode,
         True, (255, 255, 255), (0, 0, 0))
         
-    if mode == "idle":
+    if mode == "stop":
         mode_live_widget.set_enabled(not isinstance(camera, cameras.NoCamera))
         mode_record_widget.set_enabled(False)
         mode_play_widget.set_enabled(True)
@@ -116,7 +116,7 @@ def set_mode(new_camera, mode, filename=None):
         mode_record_widget.set_enabled(False)
         mode_play_widget.set_enabled(False)
     mode_camera_widget.set_enabled(
-        have_hardware and (mode == "idle" or mode == "live"))
+        have_hardware and (mode == "stop" or mode == "live"))
 
     sys_mode = mode
 
@@ -146,8 +146,8 @@ frames = 0
            
 histo_widget = widgets.HistoWidget(disp, ((640-512)/2, 512+8))
 seekbar_widget = widgets.SeekbarWidget(disp, (0, 512+72+8))
-mode_idle_widget = \
-    widgets.ButtonWidget(disp, (640+8, 440), 50, button_font, "Idle")
+mode_stop_widget = \
+    widgets.ButtonWidget(disp, (640+8, 440), 50, button_font, "Stop")
 mode_live_widget = \
     widgets.ButtonWidget(disp, (640+8+(136/2), 440), 50, button_font, "Live")
 mode_record_widget = \
@@ -162,13 +162,13 @@ histo_span_widget = \
     widgets.ButtonWidget(disp, (640+8+10, 540), 100, button_font, "Auto Span")
 
 widget_list = [histo_widget, seekbar_widget,
-    mode_idle_widget, mode_live_widget,
+    mode_stop_widget, mode_live_widget,
     mode_record_widget, mode_play_widget,
     mode_camera_widget, histo_span_widget]
     
 # start with no handler or camera by default
 handler = None
-set_mode(None, "idle")
+set_mode(None, "stop")
 
 # but we do want to switch to live mode if there is hardware
 # so the user has something to see
@@ -216,8 +216,8 @@ try:
                     next_mode = "record"
                 elif event.key == pygame.K_p:
                     next_mode = "play"
-                elif event.key == pygame.K_i:
-                    next_mode = "idle"
+                elif event.key == pygame.K_s:
+                    next_mode = "stop"
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button != 1: continue
                 pos = pygame.mouse.get_pos()
@@ -240,8 +240,8 @@ try:
             
         # check any of the buttons to see if they were clicked
         # they will get un-clicked when drawn later in the loop
-        if mode_idle_widget.clicked:
-            next_mode = "idle"
+        if mode_stop_widget.clicked:
+            next_mode = "stop"
         elif mode_live_widget.clicked:
             next_mode = "live"
         elif mode_record_widget.clicked:
@@ -254,9 +254,9 @@ try:
         # change modes based on request:
         if next_mode == "":
             pass
-        elif next_mode == "idle":
-            # it's always possible to go idle
-            set_mode(camera, "idle")
+        elif next_mode == "stop":
+            # it's always possible to stop
+            set_mode(camera, "stop")
         elif next_mode == "live":
             # can only go live if there's a camera to go live on
             if not isinstance(camera, cameras.NoCamera):
@@ -348,7 +348,7 @@ try:
             entries = 10-handler.vf.vf_bufs_to_read.qsize()
             statuses[9] = "{}%".format(int(entries*100/10))
             
-        if sys_mode != "idle":
+        if sys_mode != "stop":
             # current number of frames
             statuses[3] = str(handler.current_frame+1)
             # number of frames dropped so far
