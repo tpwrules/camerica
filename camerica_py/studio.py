@@ -60,9 +60,12 @@ def set_mode(new_camera, mode, filename=None):
         disp.fill((0, 0, 255), (0, 0, 640, 512))
         
     sys_mode = mode
-                
-  
 
+def select_camera():
+    camera_idx = tkwidgets.asklist("Hardware Setup",
+        "Select the attached camera hardware",
+        (cam.name for cam in cameras.cam_list))
+    return cameras.cam_list[camera_idx]
 
 clock = pygame.time.Clock()
 
@@ -77,6 +80,13 @@ font = pygame.font.SysFont("", 24)
 # start with no handler or camera by default
 handler = None
 set_mode(None, "none")
+
+# but we do want to switch to live mode if there is hardware
+# so the user has something to see
+if have_hardware:
+    camera = select_camera()
+    if camera is not cameras.NoCamera:
+        set_mode(camera(), "live")
 
 frames = 0
            
