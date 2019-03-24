@@ -89,6 +89,21 @@ def set_mode(new_camera, mode, filename=None):
         True, (255, 255, 255), (0, 0, 0))
     curr_mode_text = button_font.render("Current mode: "+mode,
         True, (255, 255, 255), (0, 0, 0))
+        
+    if mode == "idle":
+        mode_live_widget.set_enabled(not isinstance(camera, cameras.NoCamera))
+        mode_record_widget.set_enabled(False)
+        mode_play_widget.set_enabled(True)
+    elif mode == "live":
+        mode_live_widget.set_enabled(True)
+        mode_record_widget.set_enabled(True)
+        mode_play_widget.set_enabled(True)
+    elif mode == "record" or mode == "play":
+        mode_live_widget.set_enabled(True)
+        mode_record_widget.set_enabled(False)
+        mode_play_widget.set_enabled(False)
+    mode_camera_widget.set_enabled(
+        have_hardware and (mode == "idle" or mode == "live"))
 
     sys_mode = mode
 
@@ -114,17 +129,6 @@ font = pygame.font.SysFont("", 24)
 button_font = pygame.font.SysFont("", 18)
 statuses = ["Display FPS", ""]
 
-# start with no handler or camera by default
-handler = None
-set_mode(None, "idle")
-
-# but we do want to switch to live mode if there is hardware
-# so the user has something to see
-if have_hardware:
-    new_camera = select_camera()
-    if new_camera is not cameras.NoCamera and new_camera is not None:
-        set_mode(new_camera(), "live")
-
 frames = 0
            
 histo_widget = widgets.HistoWidget(disp, ((640-512)/2, 512+8))
@@ -137,13 +141,25 @@ mode_record_widget = \
     widgets.ButtonWidget(disp, (640+8, 470), 50, button_font, "Record")
 mode_play_widget = \
     widgets.ButtonWidget(disp, (640+8+(136/2), 470), 50, button_font, "Play")
-mode_play_widget.set_enabled(False)
+
 mode_camera_widget = \
     widgets.ButtonWidget(disp, (640+8, 380), 100, button_font, "Select Camera")
+
 widget_list = [histo_widget, seekbar_widget,
     mode_idle_widget, mode_live_widget,
     mode_record_widget, mode_play_widget,
     mode_camera_widget]
+    
+# start with no handler or camera by default
+handler = None
+set_mode(None, "idle")
+
+# but we do want to switch to live mode if there is hardware
+# so the user has something to see
+if have_hardware:
+    new_camera = select_camera()
+    if new_camera is not cameras.NoCamera and new_camera is not None:
+        set_mode(new_camera(), "live")
     
 curr_camera_text = button_font.render("Current camera:",
     True, (255, 255, 255), (0, 0, 0))
