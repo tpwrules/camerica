@@ -1,5 +1,16 @@
-import sys
+# display splash screen ASAP so it can get its glory
+# while we import and construct the rest of the program
+
 import pygame
+splash = pygame.image.load("splash/splash.png")
+disp_size = (320*2+136, 256*2+72+48)
+disp = pygame.display.set_mode(disp_size)
+pygame.display.set_caption("Camerica Studio")
+disp.blit(splash, ((disp_size[0]-splash.get_width())//2, (disp_size[1]-splash.get_height())//2))
+pygame.display.update()
+
+import sys
+
 import numpy as np
 import tkinter
 
@@ -9,8 +20,6 @@ import cameras
 import widgets
 import tkwidgets
 
-# launch the display and pygame stuff
-disp = pygame.display.set_mode((320*2+136, 256*2+72+48))
 clock = pygame.time.Clock()
 
 # start tk for our various dialogs
