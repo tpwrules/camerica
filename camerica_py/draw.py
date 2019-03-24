@@ -45,6 +45,9 @@ class Drawer:
         palette = [(c, c, c) for c in range(256)]
         self.histo_surf = pygame.image.frombuffer(self.histo_pix, (512, 64), "P")
         self.histo_surf.set_palette(palette)
+        
+        # preallocate some stuff used for histo so it doesn't go so slow
+        self.h_cols = np.arange(512)
     
     def draw(self, histo_min, histo_max):
         # shift pixels to desired offset
@@ -73,13 +76,18 @@ class Drawer:
         
     def draw_histo(self, histo_min, histo_max):
         # first calculate the maximum value, for display normalization
-        hmax = np.max(self.histobuf)
+        histobuf = self.histobuf
+        hmax = np.max(histobuf)
         # the levels mean the pixel should be on in this row
-        levels = np.linspace(hmax, 0, 64, endpoint=False, dtype=np.uint32)
+        cols = self.h_cols
+        histo_pix = self.histo_pix
+        levels = np.linspace(hmax, 0, 64, dtype=np.uint32)
         levels.shape = (64, 1)
-        np.copyto(self.histo_pix, ((self.histobuf > levels)*255).astype(np.uint8))
-        cols = np.arange(512)
-        self.histo_pix[:, (cols >= histo_min) & (cols < histo_max)] |= 0x80
+        np.greater(levels, histobuf, out=histo_pix)
+        histo_pix -= 1
+        highlighted = ((cols >= histo_min) & (cols < histo_max)).astype(np.uint8)
+        highlighted <<= 7
+        histo_pix |= highlighted
 
         self.disp.blit(self.histo_surf, ((640-512)/2, 512+8))
         

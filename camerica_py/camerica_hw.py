@@ -194,6 +194,8 @@ class Framequeue:
         self.udmabufs = []
         self.frames = []
         self.histos = []
+        # stores pairs of (frame, histo) buffers that the above ones are copied to
+        self.copybufs = []
         for bi in range(32):
             udmabuf = UDMABuf("udmabuf{}".format(bi),
                 self.camera.width*self.camera.height*2,
@@ -206,6 +208,11 @@ class Framequeue:
                 dtype=np.uint32, mode='r',
                 offset=self.camera.width*self.camera.height*2,
                 shape=(512,)))
+            
+            self.copybufs.append((
+                np.empty((self.camera.height, self.camera.width), dtype=np.uint16),
+                np.empty((512,), dtype=np.uint32)
+            ))
                 
     def start(self):
         # make sure we're stopped
@@ -231,7 +238,7 @@ class Framequeue:
         self.last_frame_counter = 0
         # kick off the DMA
         self.regs.dma_enabled = True
-        
+
     def stop(self):
         # turn off DMA enable bit
         self.regs.dma_enabled = False
@@ -257,13 +264,17 @@ class Framequeue:
         
         result = []
         
+        copyi = 0
+        
         while new_frames:
             # invalidate CPU cache for this frame buffer area
             # so we get the most up to date copy
             self.udmabufs[which_buf].flush_cache()
-            frame = self.frames[which_buf].copy()
-            histo = self.histos[which_buf].copy()
-            result.append((frame, histo))
+            copybuf = self.copybufs[copyi]
+            copyi += 1
+            np.copyto(copybuf[0], self.frames[which_buf])
+            np.copyto(copybuf[1], self.histos[which_buf])
+            result.append(copybuf)
             which_buf = (which_buf + 1) % 32
             new_frames -= 1
         
