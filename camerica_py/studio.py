@@ -1,6 +1,10 @@
 # display splash screen ASAP so it can get its glory
 # while we import and construct the rest of the program
 
+import time
+
+splash_start = time.monotonic()
+
 import pygame
 splash = pygame.image.load("splash/splash.png")
 disp_size = (320*2+136, 256*2+72+48)
@@ -173,6 +177,11 @@ curr_camera_text = button_font.render("Current camera:",
 # set when a button or key is pressed to change modes
 # the main loop then acts on the last requested action
 next_mode = ""
+
+# ensure splash gets the love it deserves
+splash_time = time.monotonic() - splash_start
+if splash_time < 5:
+    time.sleep(5-splash_time)
 
 try:
     while True:
