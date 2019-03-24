@@ -19,7 +19,7 @@ if CAMERICA_REG_BASE % mmap.ALLOCATIONGRANULARITY != 0:
         "up with ALLOCATIONGRANULARITY ({}). This shouldn't happen!").format(
         CAMERICA_REG_BASE, mmap.ALLOCATIONGRANULARITY))
         
-def is_hardware_present():
+def detect_hardware():
     # first, check to see if we are running on the FPGA we expect
     # if we aren't, just don't use the hardware
     # the user will notice they can't plug the camera in

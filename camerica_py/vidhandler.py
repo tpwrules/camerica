@@ -77,10 +77,6 @@ class VidHandler:
 # live display of the video, without any recording or playback
 class VidLiveHandler(VidHandler):
     def __init__(self, camera, bufs):
-        # check that the hardware exists
-        if not hw.is_hardware_present():
-            raise ValueError("hardware missing")
-            
         super().__init__(camera, bufs)
         
         # instantiate the hardware and video buffer
@@ -132,10 +128,6 @@ class VidLiveHandler(VidHandler):
 
 class VidRecordHandler(VidHandler):
     def __init__(self, camera, bufs, fname):
-        # check that the hardware exists
-        if not hw.is_hardware_present():
-            raise ValueError("hardware missing")
-            
         super().__init__(camera, bufs)
         
         # instantiate the hardware and video buffer

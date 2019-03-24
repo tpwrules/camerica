@@ -13,6 +13,9 @@ class Camera:
     
     hw_type = CameraType.NONE
     
+class NoCamera(Camera):
+    name = "None"
+    
 class MerlinCamera(Camera):
     name = "Merlin InSb"
     
@@ -31,7 +34,9 @@ class Photon640Camera(Camera):
     
     hw_type = CameraType.PHOTON_640
     
+# MUST BE ORDERED BY HW TYPE!!!
 cam_list = (
+    NoCamera,
     MerlinCamera,
     Photon640Camera
 )

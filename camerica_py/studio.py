@@ -9,16 +9,60 @@ pygame.display.set_caption("Camerica Studio")
 disp.blit(splash, ((disp_size[0]-splash.get_width())//2, (disp_size[1]-splash.get_height())//2))
 pygame.display.update()
 
-import sys
-
 import numpy as np
 import tkinter
 
 import vidhandler
 from draw import get_drawer
+from camerica_hw import detect_hardware
 import cameras
 import widgets
 import tkwidgets
+
+have_hardware = detect_hardware()
+
+def set_mode(new_camera, mode, filename=None):
+    global camera, drawer, handler, sys_mode, have_hardware, \
+        framebuf_handler, histobuf_handler
+    if not have_hardware:
+        if mode == "live" or mode == "record":
+            raise Exception(
+                "cannot enter {} without hardware".format(mode))
+    
+    # deactivate the old modes
+    if handler is not None:
+        handler.stop()
+    
+    handler = None
+    drawer = None
+    camera = None
+    
+    camera = new_camera
+    if mode != "none":
+        drawer = get_drawer(camera)(disp)
+        framebuf_handler = np.zeros(
+            (camera.height, camera.width), dtype=np.uint16)
+        histobuf_handler = np.zeros((1, 512), dtype=np.uint32)
+        # prevent divide by 0
+        histobuf_handler[0] = 10
+    if mode == "live":
+        handler = vidhandler.VidLiveHandler(camera,
+            (framebuf_handler, histobuf_handler))
+    elif mode == "record":
+        handler = vidhandler.VidRecordHandler(camera,
+            (framebuf_handler, histobuf_handler), filename)
+    elif mode == "play":
+        handler = vidhandler.VidPlaybackHandler(camera,
+            (framebuf_handler, histobuf_handler), filename)
+    else:
+        framebuf_handler = None
+        histobuf_handler = None
+        disp.fill((0, 0, 255), (0, 0, 640, 512))
+        
+    sys_mode = mode
+                
+  
+
 
 clock = pygame.time.Clock()
 
@@ -30,41 +74,10 @@ tk_root.withdraw()
 pygame.font.init()
 font = pygame.font.SysFont("", 24)
 
-# choose a camera to use
-camera_idx = tkwidgets.asklist("Camera", "Select the attached camera interface",
-    (cam.name for cam in cameras.cam_list))
-    
-camera = cameras.cam_list[camera_idx]()
-
-# construct the class to draw the image on screen
-drawer = get_drawer(camera)(disp)
-
-# construct buffers for the current displayed frame, to be written
-# by the handler
-framebuf_handler = np.empty(
-    (camera.height, camera.width), dtype=np.uint16)
-histobuf_handler = np.empty((1, 512), dtype=np.uint32)
-
-# save the buffers made by the drawer so we can copy into them
-framebuf = drawer.framebuf
-histobuf = drawer.histobuf
-
-mode = sys.argv[1]
-
+# start with no handler or camera by default
 handler = None
-if mode == "live":
-    handler = vidhandler.VidLiveHandler(camera,
-        (framebuf_handler, histobuf_handler))
-elif mode == "record":
-    handler = vidhandler.VidRecordHandler(camera, 
-        (framebuf_handler, histobuf_handler), sys.argv[2])
-elif mode == "play":
-    handler = vidhandler.VidPlaybackHandler(camera,
-        (framebuf_handler, histobuf_handler), sys.argv[2])
-        
-if handler is None:
-    raise Exception("invalid mode. use 'live', 'record', or 'play'")
-    
+set_mode(None, "none")
+
 frames = 0
            
 histo_widget = widgets.HistoWidget(disp, ((640-512)/2, 512+8))
@@ -95,14 +108,24 @@ try:
             if event.type == pygame.QUIT:
                 break
             elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_SPACE and mode == "play":
+                if event.key == pygame.K_SPACE and sys_mode == "play":
                     handler.playpause()
-                elif event.key == pygame.K_LEFT and mode == "play":
+                elif event.key == pygame.K_LEFT and sys_mode == "play":
                     if handler.vid_frame > 0:
                         handler.seek(handler.vid_frame-1)
-                elif event.key == pygame.K_RIGHT and mode == "play":
+                elif event.key == pygame.K_RIGHT and sys_mode == "play":
                     if handler.vid_frame < handler.saved_frames-1:
                         handler.seek(handler.vid_frame+1)
+                elif event.key == pygame.K_l and sys_mode == "none":
+                    camera_idx = tkwidgets.asklist("Hardware Setup",
+                        "Select the attached camera hardware",
+                        (cam.name for cam in cameras.cam_list))
+                    camera = cameras.cam_list[camera_idx]
+                    if camera is cameras.NoCamera:
+                        continue
+                    set_mode(camera(), "live")
+                elif event.key == pygame.K_o and sys_mode == "live":
+                    set_mode(None, "none")
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 pos = pygame.mouse.get_pos()
                 for widget in widget_list:
@@ -123,38 +146,40 @@ try:
             
         # copy the current video frame to the buffer
         # under a lock, so we don't tear it
-        handler.lock_frame()
-        np.copyto(framebuf, framebuf_handler)
-        np.copyto(histobuf, histobuf_handler)
-        handler.unlock_frame()
+        if handler is not None and drawer is not None:
+            handler.lock_frame()
+            np.copyto(drawer.framebuf, framebuf_handler)
+            np.copyto(drawer.histobuf, histobuf_handler)
+            handler.unlock_frame()
         
-        # and use the drawer to make it show on the screen
-        drawer.draw(histo_widget.min_bin, histo_widget.max_bin)
+            # and use the drawer to make it show on the screen
+            drawer.draw(histo_widget.min_bin, histo_widget.max_bin)
         
-        if seekbar_widget.new_position and mode == "play":
+        if seekbar_widget.new_position and sys_mode == "play":
             seekbar_widget.new_position = False
             handler.seek(
                 int(seekbar_widget.position*handler.saved_frames))
                 
-        if mode == "play" and handler.saved_frames > 0:
+        if sys_mode == "play" and handler.saved_frames > 0:
             seekbar_widget.draw(handler.vid_frame/handler.saved_frames)
         else:
             seekbar_widget.draw(1)
         
         # determine new status texts
         # disk buffer fullness
-        if mode == "record":
+        if sys_mode == "record":
             entries = 10-handler.vf.vf_written_bufs.qsize()
             statuses[3] = "{}%".format(int(entries*100/10))
-        elif mode == "play":
+        elif sys_mode == "play":
             entries = 10-handler.vf.vf_bufs_to_read.qsize()
             statuses[3] = "{}%".format(int(entries*100/10))
-        # current number of frames
-        statuses[5] = str(handler.current_frame+1)
-        # number of frames dropped so far
-        statuses[7] = str(handler.dropped_frames)
-        # total frames recorded/available to play
-        statuses[9] = str(handler.saved_frames)
+        if handler is not None:
+            # current number of frames
+            statuses[5] = str(handler.current_frame+1)
+            # number of frames dropped so far
+            statuses[7] = str(handler.dropped_frames)
+            # total frames recorded/available to play
+            statuses[9] = str(handler.saved_frames)
         
         # erase the status area
         disp.fill((0, 0, 0), (640+8, 0, 128, 512))
@@ -177,5 +202,6 @@ try:
         pygame.display.update()
         clock.tick(30)
 finally:
-    handler.stop()
+    if handler is not None:
+        handler.stop()
     
