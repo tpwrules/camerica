@@ -4,9 +4,13 @@ class Widget:
     def __init__(self, disp, pos, size):
         self.disp = disp
         self.rect = pygame.Rect(pos, size)
+        self.self_rect = pygame.Rect((0, 0), size)
         
     def is_hit(self, pos):
         return self.rect.collidepoint(pos)
+        
+    def is_self_hit(self, pos):
+        return self.self_rect.collidepoint(pos)
         
 class HistoWidget(Widget):
     def __init__(self, disp, pos):
@@ -37,7 +41,7 @@ class HistoWidget(Widget):
                 self.mousemove(pos)
         
     def get_hover_obj(self, pos):
-        if pos[1] < 0 or pos[1] > 63:
+        if pos[1] < 0 or pos[1] > 63 or pos[0] < -7 or pos[0] > 510+7:
             return "none"
         elif abs(pos[0]-self.min_bin) < 7:
             return "min"
@@ -113,7 +117,7 @@ class SeekbarWidget(Widget):
         self.mouse_clicked = False
             
     def mouseclick(self, down, pos):
-        self.mouse_clicked = down
+        self.mouse_clicked = down and self.is_self_hit(pos)
         self.mousemove(pos)
         
     def mousemove(self, pos):
