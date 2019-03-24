@@ -111,6 +111,7 @@ tk_root.withdraw()
 # load up whatever font pygame gives us to draw status
 pygame.font.init()
 font = pygame.font.SysFont("", 24)
+button_font = pygame.font.SysFont("", 18)
 statuses = ["Display FPS", ""]
 
 # start with no handler or camera by default
@@ -128,7 +129,8 @@ frames = 0
            
 histo_widget = widgets.HistoWidget(disp, ((640-512)/2, 512+8))
 seekbar_widget = widgets.SeekbarWidget(disp, (0, 512+72+8))
-widget_list = [histo_widget, seekbar_widget]
+widget_list = [histo_widget, seekbar_widget,
+    widgets.ButtonWidget(disp, (640+8, 512+8), 50, button_font, "click!")]
 
 try:
     while True:
@@ -245,6 +247,11 @@ try:
             pixels = font.render(value, True, (255, 255, 255), (0, 0, 0))
             disp.blit(pixels, (640+136-pixels.get_width(), status_y))
             status_y += 26+13
+            
+        # draw the buttons which also got erased
+        for widget in widget_list:
+            if isinstance(widget, widgets.ButtonWidget):
+                widget.draw()
         
         frames += 1
         if frames % 30 == 0:

@@ -133,3 +133,31 @@ class SeekbarWidget(Widget):
         pygame.draw.rect(self.disp, (200, 200, 200), self.seekbar_rect)
         pygame.draw.rect(self.disp, (100, 100, 100),
             self.seekhandle_rect.move(self.handle_pos, 0))
+            
+class ButtonWidget(Widget):
+    def __init__(self, disp, pos, width, font, text):
+        super().__init__(disp, pos, (width, 8+font.get_height()))
+        
+        self.font = font
+        self.set_text(text)
+        
+    def mouseclick(self, down, pos):
+        if down and self.is_self_hit(pos):
+            print("clicked!!")
+    
+    def mousemove(self, pos):
+        pass
+    
+    def set_text(self, text):
+        self.text = text
+        s = self.font.render(self.text, True, (255, 255, 255),
+            (75, 75, 75))
+        self.text_surf = s
+        self.text_pos = (self.rect.left+(self.rect.width-s.get_width())//2,
+            self.rect.top+(self.rect.height-s.get_height())//2)
+        self.draw()
+        
+    def draw(self):
+        pygame.draw.rect(self.disp, (75, 75, 75), self.rect)
+        pygame.draw.rect(self.disp, (255, 255, 255), self.rect, 2)
+        self.disp.blit(self.text_surf, self.text_pos)
