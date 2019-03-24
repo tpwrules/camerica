@@ -14,7 +14,7 @@ class Camera:
     hw_type = CameraType.NONE
     
 class MerlinCamera(Camera):
-    name = "merlin"
+    name = "Merlin InSb"
     
     width = 320
     height = 256
@@ -23,10 +23,15 @@ class MerlinCamera(Camera):
     hw_type = CameraType.MERLIN
     
 class Photon640Camera(Camera):
-    name = "photon640"
+    name = "FLIR Photon 640"
     
     width = 640
     height = 512
     fps = 30
     
     hw_type = CameraType.PHOTON_640
+    
+cam_list = (
+    MerlinCamera,
+    Photon640Camera
+)

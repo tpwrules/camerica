@@ -1,22 +1,31 @@
 import sys
 import pygame
 import numpy as np
+import tkinter
 
 import vidhandler
 from draw import get_drawer
 import cameras
 import widgets
+import tkwidgets
 
 # launch the display and pygame stuff
 disp = pygame.display.set_mode((320*2+136, 256*2+72+48))
 clock = pygame.time.Clock()
+
+# start tk for our various dialogs
+tk_root = tkinter.Tk()
+tk_root.withdraw()
 
 # load up whatever font pygame gives us to draw status
 pygame.font.init()
 font = pygame.font.SysFont("", 24)
 
 # choose a camera to use
-camera = cameras.Photon640Camera()
+camera_idx = tkwidgets.asklist("Camera", "Select the attached camera interface",
+    (cam.name for cam in cameras.cam_list))
+    
+camera = cameras.cam_list[camera_idx]()
 
 # construct the class to draw the image on screen
 drawer = get_drawer(camera)(disp)
