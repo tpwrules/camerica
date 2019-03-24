@@ -81,7 +81,7 @@ class Drawer:
         # the levels mean the pixel should be on in this row
         cols = self.h_cols
         histo_pix = self.histo_pix
-        levels = np.linspace(hmax, 0, 64, dtype=np.uint32)
+        levels = np.linspace(hmax, 0, 64, endpoint=False, dtype=np.uint32)
         levels.shape = (64, 1)
         np.greater(levels, histobuf, out=histo_pix)
         histo_pix -= 1
