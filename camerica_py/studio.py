@@ -24,7 +24,8 @@ have_hardware = detect_hardware()
 
 def set_mode(new_camera, mode, filename=None):
     global camera, drawer, handler, sys_mode, have_hardware, \
-        framebuf_handler, histobuf_handler, statuses
+        framebuf_handler, histobuf_handler, statuses, \
+        curr_mode_text, curr_camera_which_text, button_font
     if not have_hardware:
         if mode == "live" or mode == "record":
             raise Exception(
@@ -52,14 +53,12 @@ def set_mode(new_camera, mode, filename=None):
     if mode == "live":
         handler = vidhandler.VidLiveHandler(camera)
         statuses.extend([
-            "Mode: "+mode, camera.name,
             "Current frame", "",
             "Dropped frames", "",
         ])
     elif mode == "record":
         handler = vidhandler.VidRecordHandler(camera, filename)
         statuses.extend([
-            "Mode: "+mode, camera.name,
             "Current frame", "",
             "Dropped frames", "",
             "Saved frames", "",
@@ -69,7 +68,6 @@ def set_mode(new_camera, mode, filename=None):
         handler = vidhandler.VidPlaybackHandler(filename)
         camera = handler.camera
         statuses.extend([
-            "Mode: "+mode, camera.name,
             "Current frame", "",
             "Dropped frames", "",
             "Saved frames", "",
@@ -80,15 +78,17 @@ def set_mode(new_camera, mode, filename=None):
         histobuf_handler = None
         disp.fill((0, 0, 255), (0, 0, 640, 512))
         disp.fill((0, 0, 0), ((640-512)/2, 512+8, 512, 64))
-        statuses.extend([
-            "Mode: "+mode, camera.name,
-        ])
         
     
     if mode != "idle":
         drawer = get_drawer(camera)(disp)
         framebuf_handler = handler.framebuf
         histobuf_handler = handler.histobuf
+        
+    curr_camera_which_text = button_font.render(camera.name,
+        True, (255, 255, 255), (0, 0, 0))
+    curr_mode_text = button_font.render("Current mode: "+mode,
+        True, (255, 255, 255), (0, 0, 0))
 
     sys_mode = mode
 
@@ -129,8 +129,23 @@ frames = 0
            
 histo_widget = widgets.HistoWidget(disp, ((640-512)/2, 512+8))
 seekbar_widget = widgets.SeekbarWidget(disp, (0, 512+72+8))
+mode_idle_widget = \
+    widgets.ButtonWidget(disp, (640+8, 440), 50, button_font, "Idle")
+mode_live_widget = \
+    widgets.ButtonWidget(disp, (640+8+(136/2), 440), 50, button_font, "Live")
+mode_record_widget = \
+    widgets.ButtonWidget(disp, (640+8, 470), 50, button_font, "Record")
+mode_play_widget = \
+    widgets.ButtonWidget(disp, (640+8+(136/2), 470), 50, button_font, "Play")
+mode_camera_widget = \
+    widgets.ButtonWidget(disp, (640+8, 380), 100, button_font, "Select Camera")
 widget_list = [histo_widget, seekbar_widget,
-    widgets.ButtonWidget(disp, (640+8, 512+8), 50, button_font, "click!")]
+    mode_idle_widget, mode_live_widget,
+    mode_record_widget, mode_play_widget,
+    mode_camera_widget]
+    
+curr_camera_text = button_font.render("Current camera:",
+    True, (255, 255, 255), (0, 0, 0))
 
 try:
     while True:
@@ -222,19 +237,19 @@ try:
         # disk buffer fullness
         if sys_mode == "record":
             entries = 10-handler.vf.vf_written_bufs.qsize()
-            statuses[11] = "{}%".format(int(entries*100/10))
+            statuses[9] = "{}%".format(int(entries*100/10))
         elif sys_mode == "play":
             entries = 10-handler.vf.vf_bufs_to_read.qsize()
-            statuses[11] = "{}%".format(int(entries*100/10))
+            statuses[9] = "{}%".format(int(entries*100/10))
             
         if sys_mode != "idle":
             # current number of frames
-            statuses[5] = str(handler.current_frame+1)
+            statuses[3] = str(handler.current_frame+1)
             # number of frames dropped so far
-            statuses[7] = str(handler.dropped_frames)
+            statuses[5] = str(handler.dropped_frames)
             if sys_mode != "live":
                 # total frames recorded/available to play
-                statuses[9] = str(handler.saved_frames)
+                statuses[7] = str(handler.saved_frames)
         
         # erase the status area
         disp.fill((0, 0, 0), (640+8, 0, 128, 512))
@@ -254,6 +269,11 @@ try:
         for widget in widget_list:
             if isinstance(widget, widgets.ButtonWidget):
                 widget.draw()
+        
+        # and button labels
+        disp.blit(curr_camera_text, (640+8, 344))
+        disp.blit(curr_camera_which_text, (640+8, 360))
+        disp.blit(curr_mode_text, (640+8, 420))
         
         frames += 1
         if frames % 30 == 0:
