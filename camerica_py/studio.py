@@ -2,10 +2,13 @@
 # while we import and construct the rest of the program
 
 import time
-
 splash_start = time.monotonic()
 
-import pygame
+# eat pygame's welcome and support messages
+import contextlib
+with contextlib.redirect_stdout(None):
+    import pygame
+
 splash = pygame.image.load("splash/splash.png")
 disp_size = (320*2+136, 256*2+72+48)
 disp = pygame.display.set_mode(disp_size)
