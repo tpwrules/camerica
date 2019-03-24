@@ -139,6 +139,7 @@ class ButtonWidget(Widget):
         super().__init__(disp, pos, (width, 8+font.get_height()))
         
         self.font = font
+        self.surf = pygame.Surface(self.rect.size, 0, disp)
         self.set_text(text)
         
     def mouseclick(self, down, pos):
@@ -151,13 +152,27 @@ class ButtonWidget(Widget):
     def set_text(self, text):
         self.text = text
         s = self.font.render(self.text, True, (255, 255, 255),
-            (75, 75, 75))
+            (120, 120, 120))
         self.text_surf = s
-        self.text_pos = (self.rect.left+(self.rect.width-s.get_width())//2,
-            self.rect.top+(self.rect.height-s.get_height())//2)
+        self.text_pos = ((self.self_rect.width-s.get_width())//2,
+            (self.self_rect.height-s.get_height())//2)
+        self.dirty = True
         self.draw()
         
     def draw(self):
-        pygame.draw.rect(self.disp, (75, 75, 75), self.rect)
-        pygame.draw.rect(self.disp, (255, 255, 255), self.rect, 2)
-        self.disp.blit(self.text_surf, self.text_pos)
+        if self.dirty:
+            surf = self.surf
+            rect = self.self_rect
+            surf.fill((120, 120, 120))
+            pygame.draw.rect(surf, (200, 200, 200),
+                (rect.left, rect.top, rect.width, 2))
+            pygame.draw.rect(surf, (200, 200, 200),
+                (rect.left, rect.top, 2, rect.height))
+            pygame.draw.rect(surf, (75, 75, 75),
+                (rect.left, rect.bottom-2, rect.width, 2))
+            pygame.draw.rect(surf, (75, 75, 75),
+                (rect.right-2, rect.top, 2, rect.height))
+            surf.blit(self.text_surf, self.text_pos)
+            self.dirty = False
+        self.disp.blit(self.surf, self.rect.topleft)
+        
