@@ -24,7 +24,7 @@ have_hardware = detect_hardware()
 
 def set_mode(new_camera, mode, filename=None):
     global camera, drawer, handler, sys_mode, have_hardware, \
-        framebuf_handler, histobuf_handler
+        framebuf_handler, histobuf_handler, statuses
     if not have_hardware:
         if mode == "live" or mode == "record":
             raise Exception(
@@ -46,17 +46,43 @@ def set_mode(new_camera, mode, filename=None):
     if isinstance(camera, cameras.NoCamera) and mode != "play":
         mode = "none"
         
+    # preserve FPS
+    statuses = statuses[:2]
+        
     if mode == "live":
         handler = vidhandler.VidLiveHandler(camera)
+        statuses.extend([
+            "Mode: "+mode, camera.name,
+            "Current frame", "",
+            "Dropped frames", "",
+        ])
     elif mode == "record":
         handler = vidhandler.VidRecordHandler(camera, filename)
+        statuses.extend([
+            "Mode: "+mode, camera.name,
+            "Current frame", "",
+            "Dropped frames", "",
+            "Saved frames", "",
+            "Disk buffer", "",
+        ])
     elif mode == "play":
         handler = vidhandler.VidPlaybackHandler(filename)
         camera = handler.camera
+        statuses.extend([
+            "Mode: "+mode, camera.name,
+            "Current frame", "",
+            "Dropped frames", "",
+            "Saved frames", "",
+            "Disk buffer", "",
+        ])
     else:
         framebuf_handler = None
         histobuf_handler = None
         disp.fill((0, 0, 255), (0, 0, 640, 512))
+        statuses.extend([
+            "Mode: "+mode, camera.name,
+        ])
+        
     
     if mode != "none":
         drawer = get_drawer(camera)(disp)
@@ -82,6 +108,7 @@ tk_root.withdraw()
 # load up whatever font pygame gives us to draw status
 pygame.font.init()
 font = pygame.font.SysFont("", 24)
+statuses = ["Display FPS", ""]
 
 # start with no handler or camera by default
 handler = None
@@ -99,23 +126,6 @@ frames = 0
 histo_widget = widgets.HistoWidget(disp, ((640-512)/2, 512+8))
 seekbar_widget = widgets.SeekbarWidget(disp, (0, 512+72+8))
 widget_list = [histo_widget, seekbar_widget]
-
-# build list of status texts
-# evens are left justified, odds are right-justified
-# one row gap between them
-
-statuses = [
-    "Display FPS",
-    "",
-    "Disk buffer", # percent
-    "(unused)",
-    "Current frame", # frames
-    "",
-    "Dropped frames", # frames
-    "",
-    "Saved frames", # frames
-    "",
-]
 
 try:
     while True:
@@ -203,17 +213,19 @@ try:
         # disk buffer fullness
         if sys_mode == "record":
             entries = 10-handler.vf.vf_written_bufs.qsize()
-            statuses[3] = "{}%".format(int(entries*100/10))
+            statuses[11] = "{}%".format(int(entries*100/10))
         elif sys_mode == "play":
             entries = 10-handler.vf.vf_bufs_to_read.qsize()
-            statuses[3] = "{}%".format(int(entries*100/10))
-        if handler is not None:
+            statuses[11] = "{}%".format(int(entries*100/10))
+            
+        if sys_mode != "none":
             # current number of frames
             statuses[5] = str(handler.current_frame+1)
             # number of frames dropped so far
             statuses[7] = str(handler.dropped_frames)
-            # total frames recorded/available to play
-            statuses[9] = str(handler.saved_frames)
+            if sys_mode != "live":
+                # total frames recorded/available to play
+                statuses[9] = str(handler.saved_frames)
         
         # erase the status area
         disp.fill((0, 0, 0), (640+8, 0, 128, 512))
