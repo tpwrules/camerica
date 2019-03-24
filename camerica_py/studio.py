@@ -99,7 +99,7 @@ def set_mode(new_camera, mode, filename=None):
         mode_record_widget.set_enabled(True)
         mode_play_widget.set_enabled(True)
     elif mode == "record" or mode == "play":
-        mode_live_widget.set_enabled(True)
+        mode_live_widget.set_enabled(have_hardware)
         mode_record_widget.set_enabled(False)
         mode_play_widget.set_enabled(False)
     mode_camera_widget.set_enabled(
@@ -164,6 +164,10 @@ if have_hardware:
 curr_camera_text = button_font.render("Current camera:",
     True, (255, 255, 255), (0, 0, 0))
 
+# set when a button or key is pressed to change modes
+# the main loop then acts on the last requested action
+next_mode = ""
+
 try:
     while True:
         # pump events
@@ -179,36 +183,16 @@ try:
                 elif event.key == pygame.K_RIGHT and sys_mode == "play":
                     if handler.vid_frame < handler.saved_frames-1:
                         handler.seek(handler.vid_frame+1)
-                elif event.key == pygame.K_c and \
-                        (sys_mode == "live" or sys_mode == "idle"):
-                    if not have_hardware:
-                        continue
-                    # change attached camera. only meaningful while live
-                    new_camera = select_camera()
-                    if new_camera is not None:
-                        set_mode(new_camera(), sys_mode)
-                elif event.key == pygame.K_l and sys_mode != "live":
-                    # switch to live mode
-                    # ignore if no hardware
-                    if not have_hardware:
-                        continue
-                    set_mode(camera, "live")
-                elif event.key == pygame.K_r and sys_mode == "live":
-                    # switch to recording mode
-                    fname = asksaveasfilename(
-                        filetypes=(("Camerica Videos", "*.vid"),))
-                    if len(fname) == 0:
-                        continue
-                    set_mode(camera, "record", fname)
-                elif event.key == pygame.K_p and \
-                        (sys_mode == "live" or sys_mode == "idle"):
-                    fname = askopenfilename(
-                        filetypes=(("Camerica Videos", "*.vid"),))
-                    if len(fname) == 0:
-                        continue
-                    set_mode(camera, "play", fname)
+                elif event.key == pygame.K_c:
+                    next_mode = "select_camera"
+                elif event.key == pygame.K_l:
+                    next_mode = "live"
+                elif event.key == pygame.K_r:
+                    next_mode = "record"
+                elif event.key == pygame.K_p:
+                    next_mode = "play"
                 elif event.key == pygame.K_i:
-                    set_mode(camera, "idle")
+                    next_mode = "idle"
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button != 1: continue
                 pos = pygame.mouse.get_pos()
@@ -228,6 +212,52 @@ try:
                         (pos[0]-widget.rect.left, pos[1]-widget.rect.top))
         if event.type == pygame.QUIT:
             break
+            
+        # check any of the buttons to see if they were clicked
+        # they will get un-clicked when drawn later in the loop
+        if mode_idle_widget.clicked:
+            next_mode = "idle"
+        elif mode_live_widget.clicked:
+            next_mode = "live"
+        elif mode_record_widget.clicked:
+            next_mode = "record"
+        elif mode_play_widget.clicked:
+            next_mode = "play"
+        elif mode_camera_widget.clicked:
+            next_mode = "select_camera"
+            
+        # change modes based on request:
+        if next_mode == "":
+            pass
+        elif next_mode == "idle":
+            # it's always possible to go idle
+            set_mode(camera, "idle")
+        elif next_mode == "live":
+            # can only go live if there's a camera to go live on
+            if not isinstance(camera, cameras.NoCamera):
+                set_mode(camera, "live")
+        elif next_mode == "record":
+            # can only record if currently previewing
+            if sys_mode == "live":
+                fname = asksaveasfilename(
+                    filetypes=(("Camerica Video", "*.vid"),))
+                set_mode(camera, "record", fname)
+        elif next_mode == "play":
+            # we can play if it doesn't interrupt a recording
+            if sys_mode != "record":
+                fname = askopenfilename(
+                    filetypes=(("Camerica Video", "*.vid"),))
+                set_mode(camera, "play", fname)
+        elif next_mode == "select_camera":
+            # can only select camera if there's the possibility
+            # of a camera being attached
+            # and only if we're previewing
+            if have_hardware and sys_mode != "play" and sys_mode != "record":
+                new_camera = select_camera()
+                if new_camera is not None:
+                    set_mode(new_camera(), sys_mode)
+            
+        next_mode = ""
             
         # copy the current video frame to the buffer
         # under a lock, so we don't tear it
@@ -285,6 +315,7 @@ try:
         # draw the buttons which also got erased
         for widget in widget_list:
             if isinstance(widget, widgets.ButtonWidget):
+                widget.clicked = False
                 widget.draw()
         
         # and button labels
