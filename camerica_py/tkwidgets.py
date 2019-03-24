@@ -35,10 +35,10 @@ class _QueryList(simpledialog.Dialog):
         return self.entry
 
     def validate(self):
-        self.selection = self.entry.index(ACTIVE)
+        self.selected = self.entry.index(ACTIVE)
 
         return 1
         
 def asklist(title, prompt, choices, selected=None):
     d = _QueryList(title, prompt, choices, selected)
-    return d.selection
+    return d.selected

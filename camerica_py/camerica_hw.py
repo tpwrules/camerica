@@ -20,7 +20,44 @@ if CAMERICA_REG_BASE % mmap.ALLOCATIONGRANULARITY != 0:
         CAMERICA_REG_BASE, mmap.ALLOCATIONGRANULARITY))
         
 def is_hardware_present():
-    # we really should check...
+    # first, check to see if we are running on the FPGA we expect
+    # if we aren't, just don't use the hardware
+    # the user will notice they can't plug the camera in
+    # and conclude the camera shouldn't be working
+    try:
+        machine = open("/sys/devices/soc0/machine", "r").read()
+    except:
+        # we can't open it, so probably not
+        return False
+    if machine != "Terasic DE10 Standard\n":
+        # it has the wrong machine, so most likely not
+        return False
+    
+    # now, check to see if the hardware sysid exists where we
+    # expect
+    # if it doesn't, we can tell the user so maybe they
+    # can fix the problem
+    try:
+        sysid = open("/sys/devices/platform/sopc@0/ff200000.bridge/"+
+            "ff210000.sysid/sysid/id", "r").read()
+    except:
+        print("COULD NOT USE HARDWARE")
+        print("FPGA detected but sysid was not found.")
+        print("Is the FPGA running the correct configuration?")
+        return False
+        
+    try:
+        sysid = int(sysid)
+    except:
+        sysid = None
+    if sysid != 0xACD93B30:
+        print("COULD NOT USE HARDWARE")
+        print("FPGA detected but sysid is incorrect.")
+        print("Is the FPGA running the latest configuration?")
+        return False
+        
+    # if the sysid exists and is correct, we must believe that the
+    # hardware is present and working
     return True
     
 # which camera the hardware should expect
