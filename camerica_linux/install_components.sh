@@ -29,5 +29,12 @@ source ../venv/bin/activate
 cd camerica_py/neondraw
 python3 neondraw_build.py
 
+# link the setup scripts too just to make sure they are there
+cd /root
+rm sysdown sysup update
+ln -s /root/camerica/repo/camerica_linux/sysdown.sh sysdown
+ln -s /root/camerica/repo/camerica_linux/sysup.sh sysup
+ln -s /root/camerica/repo/camerica_linux/update.sh update
+
 echo "COMPONENTS INSTALLED"
 echo "Please reboot the system to load the new components."
