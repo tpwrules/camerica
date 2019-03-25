@@ -23,5 +23,10 @@ sync
 umount /tmp/bootmnt
 rm -rf /tmp/bootmnt
 
+echo "BUILDING NEON ACCELERATOR"
+source ../venv/bin/activate
+cd camerica_py/neondraw
+python3 neondraw_build.py
+
 echo "COMPONENTS INSTALLED"
 echo "Please reboot the system to load the new components."
