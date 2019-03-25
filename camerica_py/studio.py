@@ -273,14 +273,16 @@ try:
         elif next_mode == "record":
             # can only record if currently previewing
             if sys_mode == "live":
-                fname = asksaveasfilename(
+                fname = asksaveasfilename(initialdir="/root/recordings/",
+                    title="Record Video",
                     filetypes=(("Camerica Video", "*.vid"),))
                 if len(fname) > 0: # make sure user gave a filename
                     set_mode(camera, "record", fname)
         elif next_mode == "play":
             # we can play if it doesn't interrupt a recording
             if sys_mode != "record":
-                fname = askopenfilename(
+                fname = askopenfilename(initialdir="/root/recordings/",
+                    title="Play Video",
                     filetypes=(("Camerica Video", "*.vid"),))
                 if len(fname) > 0: # make sure user gave a filename
                     set_mode(camera, "play", fname)
