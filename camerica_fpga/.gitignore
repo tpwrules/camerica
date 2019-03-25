@@ -6,7 +6,6 @@ hps_sdram_p0_all_pins.txt
 hps_sdram_p0_summary.csv
 incremental_db/
 output_files/
-sd_fat.tar.gz
 soc_system.dtb
 soc_system.dts
 soc_system.sopcinfo
