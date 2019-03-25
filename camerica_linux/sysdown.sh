@@ -9,8 +9,23 @@ umount /root/recordings
 
 echo "DISABLING CAMERICA HARDWARE"
 source /root/camerica/venv/bin/activate
-printf 'from camerica_hw import Registers; regs = Registers(); regs.dma_enabled = False; \nwhile regs.dma_active: pass' | python3
+cat << DISPY | python3
+import contextlib
+import camerica_hw
+with contextlib.redirect_stdout(None):
+    if camerica_hw.detect_hardware():
+        regs = camerica_hw.Registers()
+        regs.dma_enabled = False
+        while regs.dma_active:
+            pass
+DISPY
 
 
-# unload the udmabuf
-rmmod udmabuf
+# unload the udmabuf if it's currently loaded
+echo "DEALLOCATING DMA BUFFERS"
+lsmod | grep udmabuf > /dev/null
+if [ $? -eq 0 ]; then
+    rmmod udmabuf
+fi
+
+echo "SYSTEM SHUTDOWN COMPLETE"
