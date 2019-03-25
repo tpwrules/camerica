@@ -2,8 +2,22 @@
 
 cd /root/camerica
 
-# shutdown as much as possible
-repo/camerica_linux/sysdown.sh > /dev/null 2>&1
+# attempt to mount the recordings directory
+echo "MOUNTING RECORDINGS DIRECTORY"
+mkdir -p /root/recordings
+
+mount | grep 'on /root/recordings' > /dev/null
+if [ $? -ne 0 ]; then
+    # could not find it, so it must not be mounted
+    # try to mount /dev/sda1 as a FAT device to it
+    mount -t vfat /dev/sda1 /root/recordings
+    if [ $? -ne 0 ]; then
+        echo "COULD NOT MOUNT USB DEVICE. MOUNTING RAM INSTEAD..."
+        mount -t tmpfs -o size=128M tmpfs /root/recordings
+    fi
+else
+    echo "RECORDINGS DIRECTORY ALREADY MOUNTED"
+fi
 
 set -e
 
