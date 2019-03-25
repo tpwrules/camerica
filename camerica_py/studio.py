@@ -166,32 +166,41 @@ widget_list = [histo_widget, seekbar_widget,
     mode_record_widget, mode_play_widget,
     mode_camera_widget, histo_span_widget]
     
-# start with no handler or camera by default
-handler = None
-set_mode(None, "stop")
-
-# but we do want to switch to live mode if there is hardware
-# so the user has something to see
-if have_hardware:
-    new_camera = select_camera()
-    if new_camera is not cameras.NoCamera and new_camera is not None:
-        set_mode(new_camera(), "live")
-    
-curr_camera_text = button_font.render("Current camera:",
-    True, (255, 255, 255), (0, 0, 0))
-
 # set when a button or key is pressed to change modes
 # the main loop then acts on the last requested action
 next_mode = ""
 
-# ensure splash gets the love it deserves
-splash_time = time.monotonic() - splash_start
-if splash_time < 5:
-    time.sleep(5-splash_time)
-    
 histo_auto_span = True
 histo_auto_min = 0
 histo_auto_max = 512
+
+curr_camera_text = button_font.render("Current camera:",
+    True, (255, 255, 255), (0, 0, 0))
+    
+# ask the user to select a camera if there is hardware
+# they get to see the splash during this, so put it before the wait loop
+camera = None
+if have_hardware:
+    new_camera = select_camera()
+else:
+    new_camera = None
+
+# ensure splash gets the love it deserves
+while (time.monotonic() - splash_start) < 5:
+    time.sleep(0.05)
+    pygame.event.pump()
+    pygame.display.update()
+    
+# start with no handler by default
+handler = None
+
+# but we do want to switch to live mode if there is hardware
+# so the user has something to see
+if new_camera is not cameras.NoCamera and new_camera is not None:
+    set_mode(new_camera(), "live")
+    new_camera = None
+else:
+    set_mode(None, "stop")
 
 try:
     while True:
@@ -283,6 +292,7 @@ try:
                 new_camera = select_camera()
                 if new_camera is not None:
                     set_mode(new_camera(), sys_mode)
+                new_camera = None
             
         next_mode = ""
         
