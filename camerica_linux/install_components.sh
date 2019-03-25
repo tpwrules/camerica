@@ -13,6 +13,7 @@ cp camerica_linux/build/zImage /tmp/bootmnt
 
 echo "UPDATING KERNEL MODULES"
 tar xzf camerica_linux/build/modules.tar.gz -C /
+mkdir -p ../ko/
 cp camerica_linux/build/udmabuf.ko ../ko/
 
 echo "UPDATING FPGA CONFIGURATION"
