@@ -21,7 +21,7 @@ P 8900 3300
 F 0 "J2" H 9079 3223 50  0000 L CNN
 F 1 "CAMERA" H 9079 3314 50  0000 L CNN
 F 2 "Connector_Dsub:DSUB-37_Male_Horizontal_P2.77x2.84mm_EdgePinOffset7.70mm_Housed_MountingHolesOffset9.12mm" H 8900 3300 50  0001 C CNN
-F 3 " ~" H 8900 3300 50  0001 C CNN
+F 3 "https://www.digikey.com/short/pjf1n8" H 8900 3300 50  0001 C CNN
 	1    8900 3300
 	1    0    0    1   
 $EndComp
@@ -32,7 +32,7 @@ P 2350 2500
 F 0 "J1" H 2400 3617 50  0000 C CNN
 F 1 "TERASIC" H 2400 3526 50  0000 C CNN
 F 2 "Connector_PinSocket_2.54mm:PinSocket_2x20_P2.54mm_Vertical" H 2350 2500 50  0001 C CNN
-F 3 "~" H 2350 2500 50  0001 C CNN
+F 3 "https://www.digikey.com/short/pjf1dv" H 2350 2500 50  0001 C CNN
 	1    2350 2500
 	1    0    0    -1  
 $EndComp
@@ -223,7 +223,7 @@ P 5500 1950
 F 0 "U1" H 5500 2565 50  0000 C CNN
 F 1 "MAX3094" H 5500 2474 50  0000 C CNN
 F 2 "Package_SO:SOIC-16_3.9x9.9mm_P1.27mm" H 5500 1300 50  0001 C CNN
-F 3 "https://datasheets.maximintegrated.com/en/ds/MAX3093E-MAX3094E.pdf" H 5500 1200 50  0001 C CNN
+F 3 "https://www.digikey.com/short/pjf1nd" H 5500 1200 50  0001 C CNN
 	1    5500 1950
 	1    0    0    -1  
 $EndComp
@@ -424,7 +424,7 @@ P 5500 3650
 F 0 "U2" H 5500 4265 50  0000 C CNN
 F 1 "MAX3094" H 5500 4174 50  0000 C CNN
 F 2 "Package_SO:SOIC-16_3.9x9.9mm_P1.27mm" H 5500 3000 50  0001 C CNN
-F 3 "https://datasheets.maximintegrated.com/en/ds/MAX3093E-MAX3094E.pdf" H 5500 2900 50  0001 C CNN
+F 3 "https://www.digikey.com/short/pjf1nd" H 5500 2900 50  0001 C CNN
 	1    5500 3650
 	1    0    0    -1  
 $EndComp
@@ -625,7 +625,7 @@ P 5500 5100
 F 0 "U3" H 5500 5715 50  0000 C CNN
 F 1 "MAX3094" H 5500 5624 50  0000 C CNN
 F 2 "Package_SO:SOIC-16_3.9x9.9mm_P1.27mm" H 5500 4450 50  0001 C CNN
-F 3 "https://datasheets.maximintegrated.com/en/ds/MAX3093E-MAX3094E.pdf" H 5500 4350 50  0001 C CNN
+F 3 "https://www.digikey.com/short/pjf1nd" H 5500 4350 50  0001 C CNN
 	1    5500 5100
 	1    0    0    -1  
 $EndComp
@@ -826,7 +826,7 @@ P 5500 6500
 F 0 "U4" H 5500 7115 50  0000 C CNN
 F 1 "MAX3094" H 5500 7024 50  0000 C CNN
 F 2 "Package_SO:SOIC-16_3.9x9.9mm_P1.27mm" H 5500 5850 50  0001 C CNN
-F 3 "https://datasheets.maximintegrated.com/en/ds/MAX3093E-MAX3094E.pdf" H 5500 5750 50  0001 C CNN
+F 3 "https://www.digikey.com/short/pjf1nd" H 5500 5750 50  0001 C CNN
 	1    5500 6500
 	1    0    0    -1  
 $EndComp
